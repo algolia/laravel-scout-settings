@@ -7,6 +7,7 @@
         "search"
     ],
     "type": "library",
+    "minimum-stability": "stable",
     "require": {
         "algolia/algoliasearch-client-php": "^1.10"
     },
