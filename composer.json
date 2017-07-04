@@ -22,5 +22,12 @@
             "name": "Julien Bourdeau",
             "email": "julien.bourdeau@algolia.com"
         }
-    ]
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Algolia\\Settings\\ServiceProvider"
+            ]
+        }
+    }
 }
