@@ -57,6 +57,6 @@ php artisan algolia:settings:push App\Contact
 ```
 
 
-### Need help?
+## Need help?
 
 Feel free to open a thread on our [Community forum](https://discourse.algolia.com/)
