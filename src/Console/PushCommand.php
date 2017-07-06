@@ -2,6 +2,7 @@
 
 namespace Algolia\Settings\Console;
 
+use AlgoliaSearch\Json;
 use Illuminate\Support\Facades\File;
 
 class PushCommand extends AlgoliaCommand
@@ -29,15 +30,21 @@ class PushCommand extends AlgoliaCommand
     {
         $class = $this->argument('model');
 
+        if (! $this->isClassSearchable($class)) {
+            return;
+        }
+
         $indexName = (new $class)->searchableAs();
 
         $index = $this->getIndex($indexName);
 
-        $settings = json_decode(File::get(
-            resource_path('settings/'.$indexName.'json')
-        ));
+        $jsonSettings = File::get($this->path.$indexName.'.json');
 
-        $index->setSettings($settings);
+        if (! $jsonSettings) {
+            $this->warn("It seems that you don't have any settings to push for [$class].");
+        }
+
+        $index->setSettings(Json::decode($jsonSettings));
 
         $this->info('All settings for ['.$class.'] index have been pushed.');
     }

@@ -29,15 +29,23 @@ class BackupCommand extends AlgoliaCommand
     {
         $class = $this->argument('model');
 
+        if (! $this->isClassSearchable($class)) {
+            return;
+        }
+
         $indexName = (new $class)->searchableAs();
 
         $index = $this->getIndex($indexName);
 
-        File::put(
-            resource_path('settings/'.$indexName.'json'),
+        $success = File::put(
+            $this->path.$indexName.'.json',
             json_encode($index->getSettings(), JSON_PRETTY_PRINT)
         );
 
-        $this->info('All settings for ['.$class.'] index have been backed up.');
+        if ($success) {
+            $this->info('All settings for ['.$class.'] index have been backed up.');
+        } else {
+            $this->warn('The settings could not be saved');
+        }
     }
 }
