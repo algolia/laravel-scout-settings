@@ -20,7 +20,7 @@ class AlgoliaCommand extends Command
 
         // Ensure settings directory exists
         if (! File::exists($this->path)) {
-            File::makeDirectory();
+            File::makeDirectory($this->path);
         }
     }
 
