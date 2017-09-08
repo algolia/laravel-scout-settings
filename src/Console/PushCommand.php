@@ -36,16 +36,25 @@ class PushCommand extends AlgoliaCommand
 
         $indexName = (new $class)->searchableAs();
 
-        $index = $this->getIndex($indexName);
-
-        $jsonSettings = File::get($this->path.$indexName.'.json');
-
-        if (! $jsonSettings) {
-            $this->warn("It seems that you don't have any settings to push for [$class].");
-        }
-
-        $index->setSettings(Json::decode($jsonSettings));
+        $this->pushSettings($indexName);
 
         $this->info('All settings for ['.$class.'] index have been pushed.');
+    }
+
+    protected function pushSettings($indexName)
+    {
+        $index = $this->getIndex($indexName);
+
+        $settings = Json::decode(File::get($this->path.$indexName.'.json'), true);
+
+        if (isset($settings['replicas'])) {
+            foreach ($settings['replicas'] as $replica) {
+                $this->pushSettings($replica);
+            }
+        }
+
+        $index->setSettings($settings);
+
+        $this->line('Pushing settings for '.$indexName.' index.');
     }
 }

@@ -35,17 +35,36 @@ class BackupCommand extends AlgoliaCommand
 
         $indexName = (new $class)->searchableAs();
 
-        $index = $this->getIndex($indexName);
-
-        $success = File::put(
-            $this->path.$indexName.'.json',
-            json_encode($index->getSettings(), JSON_PRETTY_PRINT)
-        );
+        $success = $this->saveSettings($indexName);
 
         if ($success) {
             $this->info('All settings for ['.$class.'] index have been backed up.');
         } else {
             $this->warn('The settings could not be saved');
         }
+    }
+
+    protected function saveSettings($indexName)
+    {
+        $filename = $this->path.$indexName.'.json';
+        $settings = $this->getIndex($indexName)->getSettings();
+
+        $child = true;
+        if (isset($settings['replicas'])) {
+            foreach ($settings['replicas'] as $replica) {
+                $child = $this->saveSettings($replica);
+            }
+        }
+
+        $success = File::put(
+            $filename,
+            json_encode($settings, JSON_PRETTY_PRINT)
+        );
+
+        if ($success) {
+            $this->line($filename.' was created.');
+        }
+
+        return $success && $child;
     }
 }
