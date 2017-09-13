@@ -34,7 +34,7 @@ class AlgoliaCommand extends Command
 
     protected function isClassSearchable($class)
     {
-        if (!in_array(Searchable::class, class_uses($class))) {
+        if (!in_array(Searchable::class, class_uses_recursive($class))) {
             $this->warn('The class [' . $class . '] does not use the [' . Searchable::class . '] trait');
             return false;
         }
