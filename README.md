@@ -51,7 +51,7 @@ Note: Scout allows you to customize the index name with the [`searchableAs()`](h
 The following command will export all the settings from the `App\Contact`'s index into the `resources/settings/prefix_index_name.json` file.
 
 ```
-php artisan algolia:settings:backup App\Contact
+php artisan algolia:settings:backup "App\Contact"
 ```
 
 ### Pushing settings (Project ➡️ Algolia)
@@ -59,7 +59,7 @@ php artisan algolia:settings:backup App\Contact
 The following command will read all the settings from the `resources/settings/prefix_index_name.json` file and import them into Algolia's index.
 
 ```
-php artisan algolia:settings:push App\Contact
+php artisan algolia:settings:push "App\Contact"
 ```
 
 
