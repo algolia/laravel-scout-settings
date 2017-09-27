@@ -4,7 +4,7 @@ Import/Export Algolia settings into your Laravel Scout project.
 
 The easiest way to manage your settings is usually to go to your Algolia dashboard because it has a nice UI and you can test the relevancy directly there.
 
-Once you fine tuned your configuration, you may want to add it to your project. 
+Once you fine tuned your configuration, you may want to add it to your project.
 
 This package adds two Laravel commands to your project:
 
@@ -48,7 +48,7 @@ Note: Scout allows you to customize the index name with the [`searchableAs()`](h
 
 ### Backing up settings (Project ⬅️ Algolia)
 
-The following command will export all the settings from the `App\Contact`'s index into the `resources/algolia-settings/prefix_index_name.json` file.
+The following command will export all the settings and synonyms from the `App\Contact`'s index into the `resources/algolia-settings/prefix_index_name.json` and `resources/algolia-settings/prefix_index_name-synonyms.json` files.
 
 ```
 php artisan algolia:settings:backup "App\Contact"
@@ -56,7 +56,7 @@ php artisan algolia:settings:backup "App\Contact"
 
 ### Pushing settings (Project ➡️ Algolia)
 
-The following command will read all the settings from the `resources/algolia-settings/prefix_index_name.json` file and import them into Algolia's index.
+The following command will read all the settings and synonyms from the `resources/algolia-settings/prefix_index_name.json` and `resources/algolia-settings/prefix_index_name-synonyms.json` files. and import them into Algolia's index.
 
 ```
 php artisan algolia:settings:push "App\Contact"
