@@ -39,6 +39,10 @@ class PushCommand extends AlgoliaCommand
         $this->pushSettings($indexName);
 
         $this->info('All settings for ['.$class.'] index have been pushed.');
+
+        $this->pushSynonyms($indexName);
+
+        $this->info('All synonyms for ['.$class.'] index have been pushed.');
     }
 
     protected function pushSettings($indexName)
@@ -56,5 +60,28 @@ class PushCommand extends AlgoliaCommand
         $index->setSettings($settings);
 
         $this->line('Pushing settings for '.$indexName.' index.');
+    }
+
+    protected function pushSynonyms($indexName)
+    {
+        $index = $this->getIndex($indexName);
+
+        $found = Json::decode(File::get($this->path.$indexName.'-synonyms.json'), true);
+
+        if (count($found) > 0) {
+            $synonyms = [];
+
+            foreach ($found as $synonym) {
+                $synonyms[] = [
+                    'objectID' => $synonym['objectID'],
+                    'synonyms' => $synonym['synonyms'],
+                    'type'     => $synonym['type'],
+                ];
+            }
+
+            $index->batchSynonyms($synonyms, true, true);
+        }
+
+        $this->line('Pushing synonyms for '.$indexName.' index.');
     }
 }
