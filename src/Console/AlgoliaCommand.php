@@ -6,7 +6,7 @@ use AlgoliaSearch\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Laravel\Scout\Searchable;
-
+use AlgoliaSearch\Version as AlgoliaUserAgent;
 
 class AlgoliaCommand extends Command
 {
