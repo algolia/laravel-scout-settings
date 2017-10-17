@@ -66,20 +66,10 @@ class PushCommand extends AlgoliaCommand
     {
         $index = $this->getIndex($indexName);
 
-        $found = Json::decode(File::get($this->path.$indexName.'-synonyms.json'), true);
+        $synonyms = Json::decode(File::get($this->path.$indexName.'-synonyms.json'), true);
 
-        if (count($found) > 0) {
-            $synonyms = [];
-
-            foreach ($found as $synonym) {
-                $synonyms[] = [
-                    'objectID' => $synonym['objectID'],
-                    'synonyms' => $synonym['synonyms'],
-                    'type'     => $synonym['type'],
-                ];
-            }
-
-            $index->batchSynonyms($synonyms, true, true);
+        foreach (array_chunk($synonyms, 1000) as $batch) {
+            $index->batchSynonyms($batch, true, true);
         }
 
         $this->line('Pushing synonyms for '.$indexName.' index.');

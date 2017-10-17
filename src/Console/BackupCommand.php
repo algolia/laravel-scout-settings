@@ -79,20 +79,11 @@ class BackupCommand extends AlgoliaCommand
     protected function saveSynonyms($indexName)
     {
         $filename = $this->path.$indexName.'-synonyms.json';
+        $synonymIterator = $this->getIndex($indexName)->initSynonymIterator();
         $synonyms = [];
 
-        $looping = true;
-        while($looping) {
-            $found = $this->getIndex($indexName)->searchSynonyms('');
-
-            if ($found['nbHits'] > 0) {
-                $synonyms = array_merge($synonyms, $found['hits']);
-            }
-
-            //  end the paging
-            if ($found['nbHits'] < 100) {
-                $looping = false;
-            }
+        foreach ($synonymIterator as $synonym) {
+            $synonyms[] = $synonym;
         }
 
         $success = File::put(
