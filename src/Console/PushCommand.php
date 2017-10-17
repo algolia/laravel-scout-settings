@@ -43,6 +43,10 @@ class PushCommand extends AlgoliaCommand
         $this->pushSynonyms($indexName);
 
         $this->info('All synonyms for ['.$class.'] index have been pushed.');
+
+        $this->pushRules($indexName);
+
+        $this->info('All query rules for ['.$class.'] index have been pushed.');
     }
 
     protected function pushSettings($indexName)
@@ -77,5 +81,22 @@ class PushCommand extends AlgoliaCommand
         }
 
         $this->line('Pushing synonyms for '.$indexName.' index.');
+    }
+
+    protected function pushRules($indexName)
+    {
+        $index = $this->getIndex($indexName);
+
+        // Clear all rules from the index
+        $task = $index->clearRules(true);
+        $index->waitTask($task['taskID']);
+
+        $rules = Json::decode(File::get($this->path.$indexName.'-rules.json'), true);
+
+        foreach (array_chunk($rules, 1000) as $batch) {
+            $index->batchRules($batch, true, true);
+        }
+
+        $this->line('Pushing rules for '.$indexName.' index.');
     }
 }
