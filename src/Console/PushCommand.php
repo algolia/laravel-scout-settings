@@ -66,6 +66,10 @@ class PushCommand extends AlgoliaCommand
     {
         $index = $this->getIndex($indexName);
 
+        // Clear all synonyms from the index
+        $task = $index->clearSynonyms(true);
+        $index->waitTask($task['taskID']);
+
         $synonyms = Json::decode(File::get($this->path.$indexName.'-synonyms.json'), true);
 
         foreach (array_chunk($synonyms, 1000) as $batch) {
