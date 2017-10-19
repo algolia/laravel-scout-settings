@@ -10,7 +10,7 @@
     "minimum-stability": "stable",
     "require": {
         "laravel/scout": "^3.0",
-        "algolia/algoliasearch-client-php": "^1.10"
+        "algolia/algoliasearch-client-php": "^1.22"
     },
     "autoload": {
         "psr-4": {

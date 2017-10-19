@@ -43,6 +43,10 @@ class PushCommand extends AlgoliaCommand
         $this->pushSynonyms($indexName);
 
         $this->info('All synonyms for ['.$class.'] index have been pushed.');
+
+        $this->pushRules($indexName);
+
+        $this->info('All query rules for ['.$class.'] index have been pushed.');
     }
 
     protected function pushSettings($indexName)
@@ -66,22 +70,33 @@ class PushCommand extends AlgoliaCommand
     {
         $index = $this->getIndex($indexName);
 
-        $found = Json::decode(File::get($this->path.$indexName.'-synonyms.json'), true);
+        // Clear all synonyms from the index
+        $task = $index->clearSynonyms(true);
+        $index->waitTask($task['taskID']);
 
-        if (count($found) > 0) {
-            $synonyms = [];
+        $synonyms = Json::decode(File::get($this->path.$indexName.'-synonyms.json'), true);
 
-            foreach ($found as $synonym) {
-                $synonyms[] = [
-                    'objectID' => $synonym['objectID'],
-                    'synonyms' => $synonym['synonyms'],
-                    'type'     => $synonym['type'],
-                ];
-            }
-
-            $index->batchSynonyms($synonyms, true, true);
+        foreach (array_chunk($synonyms, 1000) as $batch) {
+            $index->batchSynonyms($batch, true, true);
         }
 
         $this->line('Pushing synonyms for '.$indexName.' index.');
+    }
+
+    protected function pushRules($indexName)
+    {
+        $index = $this->getIndex($indexName);
+
+        // Clear all rules from the index
+        $task = $index->clearRules(true);
+        $index->waitTask($task['taskID']);
+
+        $rules = Json::decode(File::get($this->path.$indexName.'-rules.json'), true);
+
+        foreach (array_chunk($rules, 1000) as $batch) {
+            $index->batchRules($batch, true, true);
+        }
+
+        $this->line('Pushing rules for '.$indexName.' index.');
     }
 }

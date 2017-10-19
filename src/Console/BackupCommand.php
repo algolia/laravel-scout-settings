@@ -50,6 +50,14 @@ class BackupCommand extends AlgoliaCommand
         } else {
             $this->warn('The synonyms could not be saved');
         }
+
+        $success = $this->saveRules($indexName);
+
+        if ($success) {
+            $this->info('All query rules for ['.$class.'] index have been backed up.');
+        } else {
+            $this->warn('The query rules could not be saved');
+        }
     }
 
     protected function saveSettings($indexName)
@@ -79,25 +87,38 @@ class BackupCommand extends AlgoliaCommand
     protected function saveSynonyms($indexName)
     {
         $filename = $this->path.$indexName.'-synonyms.json';
+        $synonymIterator = $this->getIndex($indexName)->initSynonymIterator();
         $synonyms = [];
 
-        $looping = true;
-        while($looping) {
-            $found = $this->getIndex($indexName)->searchSynonyms('');
-
-            if ($found['nbHits'] > 0) {
-                $synonyms = array_merge($synonyms, $found['hits']);
-            }
-
-            //  end the paging
-            if ($found['nbHits'] < 100) {
-                $looping = false;
-            }
+        foreach ($synonymIterator as $synonym) {
+            $synonyms[] = $synonym;
         }
 
         $success = File::put(
             $filename,
             json_encode($synonyms, JSON_PRETTY_PRINT)
+        );
+
+        if ($success) {
+            $this->line($filename.' was created.');
+        }
+
+        return $success;
+    }
+
+    protected function saveRules($indexName)
+    {
+        $filename = $this->path.$indexName.'-rules.json';
+        $ruleIterator = $this->getIndex($indexName)->initRuleIterator();
+        $rules = [];
+
+        foreach ($ruleIterator as $rule) {
+            $rules[] = $rule;
+        }
+
+        $success = File::put(
+            $filename,
+            json_encode($rules, JSON_PRETTY_PRINT)
         );
 
         if ($success) {
