@@ -26,7 +26,7 @@ class AlgoliaCommand extends Command
 
     protected function getIndex($indexName)
     {
-        AlgoliaUserAgent::addSuffixUserAgentSegment('; Laravel Scout settings package', '0.x');
+        AlgoliaUserAgent::addSuffixUserAgentSegment('; Laravel Scout settings package', '1.0.0');
 
         return (new Client(
             config('scout.algolia.id'),
