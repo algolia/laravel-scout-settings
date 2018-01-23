@@ -33,7 +33,7 @@ class BackupCommand extends AlgoliaCommand
             return;
         }
 
-        $indexName = (new $class)->searchableAs();
+        $indexName = $this->resourceService->classToIndexName($class);
 
         $success = $this->saveSettings($indexName);
 
@@ -62,7 +62,7 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveSettings($indexName)
     {
-        $filename = $this->path.$indexName.'.json';
+        $filename = $this->resourceService->getFilePath($indexName.'.json');
         $settings = $this->getIndex($indexName)->getSettings();
 
         $child = true;
@@ -86,7 +86,7 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveSynonyms($indexName)
     {
-        $filename = $this->path.$indexName.'-synonyms.json';
+        $filename = $this->resourceService->getFilePath($indexName.'-synonyms.json');
         $synonymIterator = $this->getIndex($indexName)->initSynonymIterator();
         $synonyms = [];
 
@@ -108,7 +108,7 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveRules($indexName)
     {
-        $filename = $this->path.$indexName.'-rules.json';
+        $filename = $this->resourceService->getFilePath($indexName.'-rules.json');
         $ruleIterator = $this->getIndex($indexName)->initRuleIterator();
         $rules = [];
 

@@ -34,7 +34,7 @@ class PushCommand extends AlgoliaCommand
             return;
         }
 
-        $indexName = (new $class)->searchableAs();
+        $indexName = $this->resourceService->classToIndexName($class);
 
         $this->pushSettings($indexName);
 
@@ -53,7 +53,7 @@ class PushCommand extends AlgoliaCommand
     {
         $index = $this->getIndex($indexName);
 
-        $settings = Json::decode(File::get($this->path.$indexName.'.json'), true);
+        $settings = Json::decode(File::get($this->resourceService->getFilePath($indexName.'.json')), true);
 
         if (isset($settings['replicas'])) {
             foreach ($settings['replicas'] as $replica) {
@@ -74,7 +74,7 @@ class PushCommand extends AlgoliaCommand
         $task = $index->clearSynonyms(true);
         $index->waitTask($task['taskID']);
 
-        $synonyms = Json::decode(File::get($this->path.$indexName.'-synonyms.json'), true);
+        $synonyms = Json::decode(File::get($this->resourceService->getFilePath($indexName.'-synonyms.json')), true);
 
         foreach (array_chunk($synonyms, 1000) as $batch) {
             $index->batchSynonyms($batch, true, true);
@@ -91,7 +91,7 @@ class PushCommand extends AlgoliaCommand
         $task = $index->clearRules(true);
         $index->waitTask($task['taskID']);
 
-        $rules = Json::decode(File::get($this->path.$indexName.'-rules.json'), true);
+        $rules = Json::decode(File::get($this->resourceService->getFilePath($indexName.'-rules.json')), true);
 
         foreach (array_chunk($rules, 1000) as $batch) {
             $index->batchRules($batch, true, true);

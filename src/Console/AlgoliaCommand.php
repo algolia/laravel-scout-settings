@@ -2,24 +2,28 @@
 
 namespace Algolia\Settings\Console;
 
+use Algolia\Settings\Services\Resource as ResourceService;
+use Algolia\Settings\Services\Exceptions\NotSearchableException;
 use AlgoliaSearch\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Laravel\Scout\Searchable;
 
 class AlgoliaCommand extends Command
 {
     protected $path;
 
-    public function __construct()
+    protected $resourceService;
+
+    public function __construct(ResourceService $resourceService)
     {
         parent::__construct();
 
-        $this->path = resource_path(env('ALGOLIA_SETTINGS_FOLDER', 'algolia-settings/'));
+        $this->resourceService = $resourceService;
 
+        $path = $this->resourceService->getFilePath();
         // Ensure settings directory exists
-        if (! File::exists($this->path)) {
-            File::makeDirectory($this->path);
+        if (! File::exists($path)) {
+            File::makeDirectory($path);
         }
     }
 
@@ -33,8 +37,10 @@ class AlgoliaCommand extends Command
 
     protected function isClassSearchable($class)
     {
-        if (!in_array(Searchable::class, class_uses_recursive($class))) {
-            $this->warn('The class [' . $class . '] does not use the [' . Searchable::class . '] trait');
+        try {
+            $this->resourceService->validateClassSearchable($class);
+        } catch (NotSearchableException $e) {
+            $this->warn($e->getMessage());
             return false;
         }
 
