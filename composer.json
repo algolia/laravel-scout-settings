@@ -17,6 +17,11 @@
             "Algolia\\Settings\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Algolia\\Settings\\Tests\\": "tests"
+        }
+    },
     "license": "MIT",
     "authors": [
         {
@@ -24,11 +29,20 @@
             "email": "julien.bourdeau@algolia.com"
         }
     ],
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
     "extra": {
         "laravel": {
             "providers": [
                 "Algolia\\Settings\\ServiceProvider"
             ]
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5",
+        "mikey179/vfsStream": "^1.6",
+        "orchestra/testbench": "^3.4"
     }
 }

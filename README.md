@@ -66,6 +66,11 @@ The following command will read all the settings, synonyms and query rules from 
 php artisan algolia:settings:push "App\Contact"
 ```
 
+### Testing
+
+``` bash
+composer test
+```
 
 ## Need help?
 
