@@ -1,14 +1,15 @@
 <?php
 
-namespace Algolia\Settings\Tests\Algolia\Settings\Services;
+namespace Algolia\Settings\Tests\Algolia\Settings;
 
-use Algolia\Settings\Services\Exceptions\NotSearchableException;
-use Algolia\Settings\Services\Resource;
+use Algolia\Settings\IndexRepository;
+use Algolia\Settings\Tests\TestModel;
+use Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use Laravel\Scout\Searchable;
 use Orchestra\Testbench\TestCase;
 use org\bovigo\vfs\vfsStream;
 
-final class ResourceTest extends TestCase
+final class IndexRepositoryTest extends TestCase
 {
     /**
      * @var \org\bovigo\vfs\vfsStreamDirectory
@@ -83,13 +84,13 @@ POST
 
     public function testGetSettingsDefaultLocation()
     {
-        $sut = new Resource();
+        $sut = new IndexRepository();
 
         $expected = [
             'title'
         ];
 
-        $postSettings = $sut->getSettings(FakeModelWithSearchableTrait::class);
+        $postSettings = $sut->getSettings((new TestModelWithSearchableTrait)->searchableAs());
         $actual = $postSettings['searchableAttributes'];
 
         $this->assertEquals($expected, $actual);
@@ -98,7 +99,7 @@ POST
     public function testGetSettingsCustomLocation()
     {
         $org_env = env('ALGOLIA_SETTINGS_FOLDER');
-        if($org_env === null) {
+        if ($org_env === null) {
             // Currently not set. `putenv('SOME_KEY')`, so without equals sign,
             // will actually unset the env variable.
             $org_env = 'ALGOLIA_SETTINGS_FOLDER';
@@ -107,14 +108,14 @@ POST
         }
         putenv('ALGOLIA_SETTINGS_FOLDER=custom-sub-path-settings/');
 
-        $sut = new Resource();
+        $sut = new IndexRepository();
 
         $expected = [
             'title',
             'summary',
         ];
 
-        $postSettings = $sut->getSettings(FakeModelWithSearchableTrait::class);
+        $postSettings = $sut->getSettings((new TestModelWithSearchableTrait)->searchableAs());
         $actual = $postSettings['searchableAttributes'];
 
         $this->assertEquals($expected, $actual);
@@ -124,82 +125,59 @@ POST
 
     public function testValidateClassSearchableSuccessful()
     {
-        $sut = new Resource();
+        $sut = new IndexRepository();
 
-        $this->assertTrue($sut->validateClassSearchable(FakeModelWithSearchableTrait::class));
+        $this->assertTrue($sut->validateClassSearchable(TestModelWithSearchableTrait::class));
     }
 
     public function testValidateClassSearchableTraitNotImplemented()
     {
-        $this->expectException(NotSearchableException::class);
+        $sut = new IndexRepository();
 
-        $sut = new Resource();
-
-        $sut->validateClassSearchable(FakeModelWithoutSearchableTrait::class);
+        $this->assertFalse($sut->validateClassSearchable(TestModel::class));
     }
 
-    public function testClassToIndexName()
+    public function testGetFilePathJustClass()
     {
-        $sut = new Resource();
+        $sut = new IndexRepository();
 
-        $expected = 'posts';
+        $expected = 'vfs://root/resources/algolia-settings/posts.json';
 
-        $actual = $sut->classToIndexName(FakeModelWithSearchableTrait::class);
+        $actual = $sut->getFilePath((new TestModelWithSearchableTrait)->searchableAs());
 
         $this->assertEquals($expected, $actual);
     }
 
-    public function testGetFilePath()
+    public function testGetFilePathExplicitlyAskSettings()
     {
-        $sut = new Resource();
+        $sut = new IndexRepository();
 
-        $expected = 'vfs://root/resources/algolia-settings/';
+        $expected = 'vfs://root/resources/algolia-settings/posts.json';
 
-        $actual = $sut->getFilePath();
+        $actual = $sut->getFilePath((new TestModelWithSearchableTrait)->searchableAs(), 'settings');
 
         $this->assertEquals($expected, $actual);
     }
 
-    public function testGetFilePathSubPath()
+    public function testGetFilePathRules()
     {
-        $sut = new Resource();
+        $sut = new IndexRepository();
 
-        $expected = 'vfs://root/resources/algolia-settings/foo/';
+        $expected = 'vfs://root/resources/algolia-settings/posts-rules.json';
 
-        $actual = $sut->getFilePath('foo/');
+        $actual = $sut->getFilePath((new TestModelWithSearchableTrait)->searchableAs(), 'rules');
 
         $this->assertEquals($expected, $actual);
     }
 
-    public function testGetFilePathFile()
+    public function testGetFilePathSynonyms()
     {
-        $sut = new Resource();
+        $sut = new IndexRepository();
 
-        $expected = 'vfs://root/resources/algolia-settings/bar.json';
+        $expected = 'vfs://root/resources/algolia-settings/posts-synonyms.json';
 
-        $actual = $sut->getFilePath('bar.json');
+        $actual = $sut->getFilePath((new TestModelWithSearchableTrait)->searchableAs(), 'synonyms');
 
         $this->assertEquals($expected, $actual);
-    }
-}
-
-/**
- * Tmp class. Since Laravel 5.4 is supported, the minimum version of PHP is
- * 5.6.4, anonymous class would be better here, but only available since PHP 7.
- */
-class FakeModelWithSearchableTrait
-{
-    use Searchable;
-
-    public function getTable()
-    {
-        return 'posts';
-    }
-}
-class FakeModelWithoutSearchableTrait
-{
-    public function getTable()
-    {
-        return 'posts';
     }
 }
