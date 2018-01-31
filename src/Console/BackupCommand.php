@@ -3,8 +3,9 @@
 namespace Algolia\Settings\Console;
 
 use Illuminate\Support\Facades\File;
+use Laravel\Scout\Searchable;
 
-class BackupCommand extends AlgoliaCommand
+final class BackupCommand extends AlgoliaCommand
 {
     /**
      * The name and signature of the console command.
@@ -23,22 +24,25 @@ class BackupCommand extends AlgoliaCommand
     /**
      * Execute the console command.
      *
-     * @return void
+     * @return int
      */
     public function handle()
     {
-        $class = $this->argument('model');
+        $fqn = $this->argument('model');
 
-        if (! $this->isClassSearchable($class)) {
-            return;
+        if (! $this->isClassSearchable($fqn)) {
+            $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
+
+            // Return value >0 to indicate error. Bash "1" means "general error"
+            return 1;
         }
 
-        $indexName = $this->resourceService->classToIndexName($class);
+        $indexName = (new $fqn)->searchableAs();
 
         $success = $this->saveSettings($indexName);
 
         if ($success) {
-            $this->info('All settings for ['.$class.'] index have been backed up.');
+            $this->info('All settings for ['.$fqn.'] index have been backed up.');
         } else {
             $this->warn('The settings could not be saved');
         }
@@ -46,7 +50,7 @@ class BackupCommand extends AlgoliaCommand
         $success = $this->saveSynonyms($indexName);
 
         if ($success) {
-            $this->info('All synonyms for ['.$class.'] index have been backed up.');
+            $this->info('All synonyms for ['.$fqn.'] index have been backed up.');
         } else {
             $this->warn('The synonyms could not be saved');
         }
@@ -54,7 +58,7 @@ class BackupCommand extends AlgoliaCommand
         $success = $this->saveRules($indexName);
 
         if ($success) {
-            $this->info('All query rules for ['.$class.'] index have been backed up.');
+            $this->info('All query rules for ['.$fqn.'] index have been backed up.');
         } else {
             $this->warn('The query rules could not be saved');
         }
@@ -62,7 +66,7 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveSettings($indexName)
     {
-        $filename = $this->resourceService->getFilePath($indexName.'.json');
+        $filename = $this->indexRepository->getFilePath($indexName);
         $settings = $this->getIndex($indexName)->getSettings();
 
         $child = true;
@@ -86,7 +90,7 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveSynonyms($indexName)
     {
-        $filename = $this->resourceService->getFilePath($indexName.'-synonyms.json');
+        $filename = $this->indexRepository->getFilePath($indexName, 'synonyms');
         $synonymIterator = $this->getIndex($indexName)->initSynonymIterator();
         $synonyms = [];
 
@@ -108,7 +112,7 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveRules($indexName)
     {
-        $filename = $this->resourceService->getFilePath($indexName.'-rules.json');
+        $filename = $this->indexRepository->getFilePath($indexName, 'rules');
         $ruleIterator = $this->getIndex($indexName)->initRuleIterator();
         $rules = [];
 
