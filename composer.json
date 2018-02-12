@@ -9,8 +9,8 @@
     "type": "library",
     "minimum-stability": "stable",
     "require": {
-        "laravel/scout": "^3.0",
-        "algolia/algoliasearch-client-php": "^1.22"
+        "laravel/scout": "^4.0",
+        "algolia/algoliasearch-client-php": "^1.25"
     },
     "autoload": {
         "psr-4": {
