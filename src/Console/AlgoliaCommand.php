@@ -6,7 +6,6 @@ use AlgoliaSearch\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Laravel\Scout\Searchable;
-use AlgoliaSearch\Version as AlgoliaUserAgent;
 
 class AlgoliaCommand extends Command
 {
@@ -26,8 +25,6 @@ class AlgoliaCommand extends Command
 
     protected function getIndex($indexName)
     {
-        AlgoliaUserAgent::addSuffixUserAgentSegment('; Laravel Scout settings package', '1.0.0');
-
         return (new Client(
             config('scout.algolia.id'),
             config('scout.algolia.secret'))
