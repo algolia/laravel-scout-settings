@@ -9,7 +9,7 @@
     "type": "library",
     "minimum-stability": "stable",
     "require": {
-        "laravel/scout": "^4.0",
+        "laravel/scout": "^3.0 || ^4.0",
         "algolia/algoliasearch-client-php": "^1.25"
     },
     "autoload": {
