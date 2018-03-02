@@ -66,6 +66,13 @@ The following command will read all the settings, synonyms and query rules from 
 php artisan algolia:settings:push "App\Contact"
 ```
 
+### Customizing directory
+
+By default, settings, rules and synonyms are saved into the `resources/algolia-settings`. The directory can be customized by the defining an environment variable named `ALGOLIA_SETTINGS_FOLDER`. For example, the following command will save all the index resources into `resources/indexmeta`.
+
+```
+ALGOLIA_SETTINGS_FOLDER=indexmeta php artisan algolia:settings:backup
+```
 
 ## Need help?
 
