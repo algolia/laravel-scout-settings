@@ -3,14 +3,23 @@
 namespace Algolia\Settings;
 
 use Algolia\Settings\Console\BackupCommand;
+use Exception;
 use AlgoliaSearch\Client;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Algolia\Settings\Console\PushCommand;
+use AlgoliaSearch\Version as AlgoliaUserAgent;
 
 final class ServiceProvider extends LaravelServiceProvider
 {
-    const VERSION = '1.0.0';
+    public function boot()
+    {
+        AlgoliaUserAgent::addSuffixUserAgentSegment('; Laravel Scout settings package', '1.0.1');
+
+        if (!class_exists('AlgoliaSearch\Client')) {
+            throw new Exception("It seems like you are not using Algolia. This package requires the Algolia engine.", 1);
+        }
+    }
 
     public function register()
     {
