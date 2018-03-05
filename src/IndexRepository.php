@@ -24,20 +24,6 @@ final class IndexRepository
         );
     }
 
-    /**
-     * @param string $fqn
-     *
-     * @return bool
-     */
-    public function validateClassSearchable($fqn)
-    {
-        if (! in_array(Searchable::class, class_uses_recursive($fqn))) {
-            return false;
-        }
-
-        return true;
-    }
-
     public function getFilePath($indexName, $type = 'settings')
     {
         $path = $this->getBasePath() . $indexName . $this->normalizeType($type) . '.json';
