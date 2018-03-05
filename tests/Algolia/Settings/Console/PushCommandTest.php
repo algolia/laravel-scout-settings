@@ -3,7 +3,7 @@
 namespace Algolia\Settings\Tests\Console;
 
 use Algolia\Settings\Console\PushCommand;
-use Algolia\Settings\IndexRepository;
+use Algolia\Settings\IndexResourceRepository;
 use Algolia\Settings\Tests\TestModel;
 use Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use AlgoliaSearch\Client;
@@ -76,7 +76,7 @@ final class PushCommandTest extends TestCase
 
     public function testHandleSearchableModel()
     {
-        $this->app[Kernel::class]->registerCommand(new PushCommand(new IndexRepository()));
+        $this->app[Kernel::class]->registerCommand(new PushCommand(new IndexResourceRepository()));
         $this->app->bind(Client::class, function () {
             $clientProphet = $this->prophesize(Client::class);
 
@@ -94,7 +94,7 @@ final class PushCommandTest extends TestCase
 
     public function testHandleNonSearchableModel()
     {
-        $this->app[Kernel::class]->registerCommand(new PushCommand(new IndexRepository()));
+        $this->app[Kernel::class]->registerCommand(new PushCommand(new IndexResourceRepository()));
 
         $return_code = $this->artisan('algolia:settings:push', ['model' => TestModel::class]);
         $cli_output = $this->app[Kernel::class]->output();

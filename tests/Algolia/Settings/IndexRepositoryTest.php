@@ -2,7 +2,7 @@
 
 namespace Algolia\Settings\Tests\Algolia\Settings;
 
-use Algolia\Settings\IndexRepository;
+use Algolia\Settings\IndexResourceRepository;
 use Algolia\Settings\Tests\TestModel;
 use Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use Laravel\Scout\Searchable;
@@ -84,7 +84,7 @@ POST
 
     public function testGetSettingsDefaultLocation()
     {
-        $sut = new IndexRepository();
+        $sut = new IndexResourceRepository();
 
         $expected = [
             'title'
@@ -108,7 +108,7 @@ POST
         }
         putenv('ALGOLIA_SETTINGS_FOLDER=custom-sub-path-settings/');
 
-        $sut = new IndexRepository();
+        $sut = new IndexResourceRepository();
 
         $expected = [
             'title',
@@ -125,21 +125,21 @@ POST
 
     public function testValidateClassSearchableSuccessful()
     {
-        $sut = new IndexRepository();
+        $sut = new IndexResourceRepository();
 
         $this->assertTrue($sut->validateClassSearchable(TestModelWithSearchableTrait::class));
     }
 
     public function testValidateClassSearchableTraitNotImplemented()
     {
-        $sut = new IndexRepository();
+        $sut = new IndexResourceRepository();
 
         $this->assertFalse($sut->validateClassSearchable(TestModel::class));
     }
 
     public function testGetFilePathJustClass()
     {
-        $sut = new IndexRepository();
+        $sut = new IndexResourceRepository();
 
         $expected = 'vfs://root/resources/algolia-settings/posts.json';
 
@@ -150,7 +150,7 @@ POST
 
     public function testGetFilePathExplicitlyAskSettings()
     {
-        $sut = new IndexRepository();
+        $sut = new IndexResourceRepository();
 
         $expected = 'vfs://root/resources/algolia-settings/posts.json';
 
@@ -161,7 +161,7 @@ POST
 
     public function testGetFilePathRules()
     {
-        $sut = new IndexRepository();
+        $sut = new IndexResourceRepository();
 
         $expected = 'vfs://root/resources/algolia-settings/posts-rules.json';
 
@@ -172,7 +172,7 @@ POST
 
     public function testGetFilePathSynonyms()
     {
-        $sut = new IndexRepository();
+        $sut = new IndexResourceRepository();
 
         $expected = 'vfs://root/resources/algolia-settings/posts-synonyms.json';
 

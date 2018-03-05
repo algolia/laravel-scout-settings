@@ -6,7 +6,7 @@ use AlgoliaSearch\Json;
 use Illuminate\Support\Facades\File;
 use Laravel\Scout\Searchable;
 
-final class IndexRepository
+final class IndexResourceRepository
 {
     public function __construct()
     {

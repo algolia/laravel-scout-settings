@@ -32,7 +32,7 @@ final class ServiceProvider extends LaravelServiceProvider
         ]);
 
         // Service class is stateless so instantiate once
-        $this->app->singleton(IndexRepository::class, IndexRepository::class);
+        $this->app->singleton(IndexResourceRepository::class, IndexResourceRepository::class);
 
         $this->app->bind(Client::class, function (Application $application) {
             return new Client(
