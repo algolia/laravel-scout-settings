@@ -66,7 +66,6 @@ final class BackupCommand extends AlgoliaCommand
 
     protected function saveSettings($indexName)
     {
-        $filename = $this->indexRepository->getFilePath($indexName);
         $settings = $this->getIndex($indexName)->getSettings();
 
         $child = true;
@@ -76,13 +75,10 @@ final class BackupCommand extends AlgoliaCommand
             }
         }
 
-        $success = File::put(
-            $filename,
-            json_encode($settings, JSON_PRETTY_PRINT)
-        );
+        $success = $this->indexRepository->saveSettings($indexName, $settings);
 
         if ($success) {
-            $this->line($filename.' was created.');
+            $this->line("Saved settings for $indexName");
         }
 
         return $success && $child;
@@ -90,21 +86,17 @@ final class BackupCommand extends AlgoliaCommand
 
     protected function saveSynonyms($indexName)
     {
-        $filename = $this->indexRepository->getFilePath($indexName, 'synonyms');
         $synonymIterator = $this->getIndex($indexName)->initSynonymIterator();
-        $synonyms = [];
 
+        $synonyms = [];
         foreach ($synonymIterator as $synonym) {
             $synonyms[] = $synonym;
         }
 
-        $success = File::put(
-            $filename,
-            json_encode($synonyms, JSON_PRETTY_PRINT)
-        );
+        $success = $this->indexRepository->saveSynonyms($indexName, $synonyms);
 
         if ($success) {
-            $this->line($filename.' was created.');
+            $this->line("Saved synonyms for $indexName");
         }
 
         return $success;
@@ -112,21 +104,18 @@ final class BackupCommand extends AlgoliaCommand
 
     protected function saveRules($indexName)
     {
-        $filename = $this->indexRepository->getFilePath($indexName, 'rules');
         $ruleIterator = $this->getIndex($indexName)->initRuleIterator();
-        $rules = [];
 
+        $rules = [];
         foreach ($ruleIterator as $rule) {
             $rules[] = $rule;
         }
 
-        $success = File::put(
-            $filename,
-            json_encode($rules, JSON_PRETTY_PRINT)
-        );
+        $success = $this->indexRepository->saveRules($indexName, $rules);
 
         if ($success) {
-            $this->line($filename.' was created.');
+            $this->line("Saved synonyms for $indexName");
+
         }
 
         return $success;
