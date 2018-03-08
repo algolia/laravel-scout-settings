@@ -55,9 +55,7 @@ final class PushCommand extends AlgoliaCommand
 
     protected function pushSettings($indexName)
     {
-        $index = $this->getIndex($indexName);
-
-        $settings = Json::decode(File::get($this->indexRepository->getFilePath($indexName)), true);
+        $settings = $this->indexRepository->getSettings($indexName);
 
         if (isset($settings['replicas'])) {
             foreach ($settings['replicas'] as $replica) {
@@ -65,7 +63,7 @@ final class PushCommand extends AlgoliaCommand
             }
         }
 
-        $index->setSettings($settings);
+        $this->getIndex($indexName)->setSettings($settings);
 
         $this->line('Pushing settings for ' . $indexName . ' index.');
     }
@@ -78,7 +76,7 @@ final class PushCommand extends AlgoliaCommand
         $task = $index->clearSynonyms(true);
         $index->waitTask($task['taskID']);
 
-        $synonyms = Json::decode(File::get($this->indexRepository->getFilePath($indexName, 'synonyms')), true);
+        $synonyms = $this->indexRepository->getSynonyms($indexName);
 
         foreach (array_chunk($synonyms, 1000) as $batch) {
             $index->batchSynonyms($batch, true, true);
@@ -95,7 +93,7 @@ final class PushCommand extends AlgoliaCommand
         $task = $index->clearRules(true);
         $index->waitTask($task['taskID']);
 
-        $rules = Json::decode(File::get($this->indexRepository->getFilePath($indexName, 'rules')), true);
+        $rules = $this->indexRepository->getRules($indexName);
 
         foreach (array_chunk($rules, 1000) as $batch) {
             $index->batchRules($batch, true, true);

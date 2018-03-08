@@ -2,15 +2,16 @@
 
 namespace Algolia\Settings\Console;
 
-use Algolia\Settings\IndexRepository;
+use Algolia\Settings\IndexResourceRepository;
 use AlgoliaSearch\Client;
 use Illuminate\Console\Command;
+use Laravel\Scout\Searchable;
 
 abstract class AlgoliaCommand extends Command
 {
     protected $indexRepository;
 
-    public function __construct(IndexRepository $indexRepository)
+    public function __construct(IndexResourceRepository $indexRepository)
     {
         parent::__construct();
 
@@ -22,8 +23,11 @@ abstract class AlgoliaCommand extends Command
         return app(Client::class)->initIndex($indexName);
     }
 
-    protected function isClassSearchable($class)
+    protected function isClassSearchable($fqn)
     {
-        return $this->indexRepository->validateClassSearchable($class);
+        if (! in_array(Searchable::class, class_uses_recursive($fqn))) {
+            return false;
+        }
+        return true;
     }
 }

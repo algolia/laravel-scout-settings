@@ -3,7 +3,7 @@
 namespace Algolia\Settings\Tests\Console;
 
 use Algolia\Settings\Console\BackupCommand;
-use Algolia\Settings\IndexRepository;
+use Algolia\Settings\IndexResourceRepository;
 use Algolia\Settings\Tests\TestModel;
 use Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use AlgoliaSearch\Client;
@@ -33,7 +33,8 @@ final class BackupCommandTest extends TestCase
 
     public function testHandleSearchableModel()
     {
-        $this->app[Kernel::class]->registerCommand(new BackupCommand(new IndexRepository()));
+        $this->app[Kernel::class]->registerCommand(new BackupCommand(new IndexResourceRepository()));
+
         $this->app->bind(Client::class, function () {
             $clientProphet = $this->prophesize(Client::class);
 
@@ -77,7 +78,7 @@ final class BackupCommandTest extends TestCase
 
     public function testHandleNonSearchableModel()
     {
-        $this->app[Kernel::class]->registerCommand(new BackupCommand(new IndexRepository()));
+        $this->app[Kernel::class]->registerCommand(new BackupCommand(new IndexResourceRepository()));
 
         $return_code = $this->artisan('algolia:settings:backup', ['model' => TestModel::class]);
         $cli_output = $this->app[Kernel::class]->output();
