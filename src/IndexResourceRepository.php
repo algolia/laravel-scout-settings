@@ -17,49 +17,47 @@ final class IndexResourceRepository
 
     public function getSettings($indexName)
     {
-        return Json::decode(
-            File::get($this->getFilePath($indexName, 'settings')),
-            true
-        );
+        return $this->getJsonFromFile($this->getFilePath($indexName, 'settings'));
     }
 
     public function saveSettings($indexName, $settings)
     {
-        return File::put(
-            $this->getFilePath($indexName, 'settings'),
-            Json::encode($settings, JSON_PRETTY_PRINT)
-        );
+        return $this->saveJsonFile($this->getFilePath($indexName, 'settings'), $settings);
     }
 
     public function getSynonyms($indexName)
     {
-        return Json::decode(
-            File::get($this->getFilePath($indexName, 'synonyms')),
-            true
-        );
+        return $this->getJsonFromFile($this->getFilePath($indexName, 'synonyms'));
     }
 
     public function saveSynonyms($indexName, $synonyms)
     {
-        return File::put(
-            $this->getFilePath($indexName, 'synonyms'),
-            Json::encode($synonyms, JSON_PRETTY_PRINT)
-        );
+        return $this->saveJsonFile($this->getFilePath($indexName, 'synonyms'), $synonyms);
     }
 
     public function getRules($indexName)
     {
-        return Json::decode(
-            File::get($this->getFilePath($indexName, 'rules')),
-            true
-        );
+        return $this->getJsonFromFile($this->getFilePath($indexName, 'rules'));
     }
 
     public function saveRules($indexName, $rules)
     {
+        return $this->saveJsonFile($this->getFilePath($indexName, 'rules'), $rules);
+    }
+
+    private function getJsonFromFile($path)
+    {
+        return Json::decode(
+            File::get($path),
+            true
+        );
+    }
+
+    private function saveJsonFile($path, $json)
+    {
         return File::put(
-            $this->getFilePath($indexName, 'rules'),
-            Json::encode($rules, JSON_PRETTY_PRINT)
+            $path,
+            Json::encode($json, JSON_PRETTY_PRINT)
         );
     }
 
