@@ -25,7 +25,7 @@ abstract class AlgoliaCommand extends Command
 
     protected function isClassSearchable($fqn)
     {
-        if (! in_array(Searchable::class, class_uses_recursive($fqn))) {
+        if (! \in_array(Searchable::class, class_uses_recursive($fqn), true)) {
             return false;
         }
         return true;
