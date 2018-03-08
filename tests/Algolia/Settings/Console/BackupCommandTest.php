@@ -48,8 +48,36 @@ final class BackupCommandTest extends TestCase
                 ],
                 'customRanking'        => null,
             ]);
-            $postIndexProphet->initSynonymIterator()->willReturn([]);
-            $postIndexProphet->initRuleIterator()->willReturn([]);
+            $postIndexProphet->initSynonymIterator()->willReturn([
+                [
+                    'type'     => 'synonym',
+                    'synonyms' => [
+                        'foo',
+                        'bar',
+                        'fooz',
+                        'baz',
+                    ],
+                    'objectID' => '1520518966426',
+                ],
+            ]);
+            $postIndexProphet->initRuleIterator()->willReturn([
+                [
+                    'condition'   => [
+                        'pattern'   => '{facet:prefered_contact}',
+                        'anchoring' => 'contains',
+                        'context'   => 'e-commerce',
+                    ],
+                    'consequence' => [
+                        'promote' => [
+                            [
+                                'objectID' => '99',
+                                'position' => 0
+                            ]
+                        ]
+                    ],
+                    'description' => 'Foo bar'
+                ]
+            ]);
 
             $clientProphet->initIndex('posts')->willReturn($postIndexProphet->reveal());
 
