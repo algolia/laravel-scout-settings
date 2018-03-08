@@ -9,7 +9,7 @@ use Laravel\Scout\Searchable;
 use Orchestra\Testbench\TestCase;
 use org\bovigo\vfs\vfsStream;
 
-final class IndexRepositoryTest extends TestCase
+final class IndexResourceRepositoryTest extends TestCase
 {
     /**
      * @var \org\bovigo\vfs\vfsStreamDirectory
@@ -123,61 +123,30 @@ POST
         putenv($org_env);
     }
 
-//    public function testValidateClassSearchableSuccessful()
-//    {
-//        $sut = new IndexResourceRepository();
-//
-//        $this->assertTrue($sut->validateClassSearchable(TestModelWithSearchableTrait::class));
-//    }
-//
-//    public function testValidateClassSearchableTraitNotImplemented()
-//    {
-//        $sut = new IndexResourceRepository();
-//
-//        $this->assertFalse($sut->validateClassSearchable(TestModel::class));
-//    }
-//
-//    public function testGetFilePathJustClass()
-//    {
-//        $sut = new IndexResourceRepository();
-//
-//        $expected = 'vfs://root/resources/algolia-settings/posts.json';
-//
-//        $actual = $sut->getFilePath((new TestModelWithSearchableTrait)->searchableAs());
-//
-//        $this->assertEquals($expected, $actual);
-//    }
-//
-//    public function testGetFilePathExplicitlyAskSettings()
-//    {
-//        $sut = new IndexResourceRepository();
-//
-//        $expected = 'vfs://root/resources/algolia-settings/posts.json';
-//
-//        $actual = $sut->getFilePath((new TestModelWithSearchableTrait)->searchableAs(), 'settings');
-//
-//        $this->assertEquals($expected, $actual);
-//    }
-//
-//    public function testGetFilePathRules()
-//    {
-//        $sut = new IndexResourceRepository();
-//
-//        $expected = 'vfs://root/resources/algolia-settings/posts-rules.json';
-//
-//        $actual = $sut->getFilePath((new TestModelWithSearchableTrait)->searchableAs(), 'rules');
-//
-//        $this->assertEquals($expected, $actual);
-//    }
-//
-//    public function testGetFilePathSynonyms()
-//    {
-//        $sut = new IndexResourceRepository();
-//
-//        $expected = 'vfs://root/resources/algolia-settings/posts-synonyms.json';
-//
-//        $actual = $sut->getFilePath((new TestModelWithSearchableTrait)->searchableAs(), 'synonyms');
-//
-//        $this->assertEquals($expected, $actual);
-//    }
+    public function testSaveSettings()
+    {
+        $settings = [
+            'searchableAttributes' => [
+                'title',
+                'summary',
+                'tags',
+            ],
+            'replicas'             => [
+                'posts_newest',
+                'posts_oldest',
+            ],
+            'customRanking'        => null,
+        ];
+
+        $sut = new IndexResourceRepository();
+
+        $actual = $sut->saveSettings((new TestModelWithSearchableTrait)->searchableAs(), $settings);
+        $expected = \json_encode($settings);
+
+        $this->assertNotFalse($actual);
+        $this->assertJsonStringEqualsJsonString(
+            $expected,
+            $this->file_system->getChild('resources/algolia-settings/posts.json')->getContent()
+        );
+    }
 }
