@@ -2,7 +2,6 @@
 
 namespace Algolia\Settings\Console;
 
-use Illuminate\Support\Facades\File;
 use Laravel\Scout\Searchable;
 
 final class BackupCommand extends AlgoliaCommand
@@ -12,7 +11,7 @@ final class BackupCommand extends AlgoliaCommand
      *
      * @var string
      */
-    protected $signature = 'algolia:settings:backup {model}';
+    protected $signature = 'algolia:settings:backup {model} {--prefix}';
 
     /**
      * The console command description.
@@ -29,6 +28,7 @@ final class BackupCommand extends AlgoliaCommand
     public function handle()
     {
         $fqn = $this->argument('model');
+        $this->indexRepository->usePrefix($this->option('prefix'));
 
         if (! $this->isClassSearchable($fqn)) {
             $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');

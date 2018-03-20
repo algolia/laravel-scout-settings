@@ -2,8 +2,6 @@
 
 namespace Algolia\Settings\Console;
 
-use AlgoliaSearch\Json;
-use Illuminate\Support\Facades\File;
 use Laravel\Scout\Searchable;
 
 final class PushCommand extends AlgoliaCommand
@@ -13,7 +11,7 @@ final class PushCommand extends AlgoliaCommand
      *
      * @var string
      */
-    protected $signature = 'algolia:settings:push {model}';
+    protected $signature = 'algolia:settings:push {model} {--prefix}';
 
     /**
      * The console command description.
@@ -30,6 +28,7 @@ final class PushCommand extends AlgoliaCommand
     public function handle()
     {
         $fqn = $this->argument('model');
+        $this->indexRepository->usePrefix($this->option('prefix'));
 
         if (! $this->isClassSearchable($fqn)) {
             $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
