@@ -2,42 +2,32 @@
 
 namespace Algolia\Settings\Console;
 
+use Algolia\Settings\IndexResourceRepository;
 use AlgoliaSearch\Client;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Laravel\Scout\Searchable;
 
-class AlgoliaCommand extends Command
+abstract class AlgoliaCommand extends Command
 {
-    protected $path;
+    protected $indexRepository;
 
-    public function __construct()
+    public function __construct(IndexResourceRepository $indexRepository)
     {
         parent::__construct();
 
-        $this->path = resource_path(env('ALGOLIA_SETTINGS_FOLDER', 'algolia-settings/'));
-
-        // Ensure settings directory exists
-        if (! File::exists($this->path)) {
-            File::makeDirectory($this->path);
-        }
+        $this->indexRepository = $indexRepository;
     }
 
     protected function getIndex($indexName)
     {
-        return (new Client(
-            config('scout.algolia.id'),
-            config('scout.algolia.secret'))
-        )->initIndex($indexName);
+        return app(Client::class)->initIndex($indexName);
     }
 
-    protected function isClassSearchable($class)
+    protected function isClassSearchable($fqn)
     {
-        if (!in_array(Searchable::class, class_uses_recursive($class))) {
-            $this->warn('The class [' . $class . '] does not use the [' . Searchable::class . '] trait');
+        if (! \in_array(Searchable::class, class_uses_recursive($fqn), true)) {
             return false;
         }
-
         return true;
     }
 }

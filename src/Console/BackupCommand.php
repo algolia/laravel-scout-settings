@@ -3,8 +3,9 @@
 namespace Algolia\Settings\Console;
 
 use Illuminate\Support\Facades\File;
+use Laravel\Scout\Searchable;
 
-class BackupCommand extends AlgoliaCommand
+final class BackupCommand extends AlgoliaCommand
 {
     /**
      * The name and signature of the console command.
@@ -23,22 +24,25 @@ class BackupCommand extends AlgoliaCommand
     /**
      * Execute the console command.
      *
-     * @return void
+     * @return int
      */
     public function handle()
     {
-        $class = $this->argument('model');
+        $fqn = $this->argument('model');
 
-        if (! $this->isClassSearchable($class)) {
-            return;
+        if (! $this->isClassSearchable($fqn)) {
+            $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
+
+            // Return value >0 to indicate error. Bash "1" means "general error"
+            return 1;
         }
 
-        $indexName = (new $class)->searchableAs();
+        $indexName = (new $fqn)->searchableAs();
 
         $success = $this->saveSettings($indexName);
 
         if ($success) {
-            $this->info('All settings for ['.$class.'] index have been backed up.');
+            $this->info('All settings for ['.$fqn.'] index have been backed up.');
         } else {
             $this->warn('The settings could not be saved');
         }
@@ -46,7 +50,7 @@ class BackupCommand extends AlgoliaCommand
         $success = $this->saveSynonyms($indexName);
 
         if ($success) {
-            $this->info('All synonyms for ['.$class.'] index have been backed up.');
+            $this->info('All synonyms for ['.$fqn.'] index have been backed up.');
         } else {
             $this->warn('The synonyms could not be saved');
         }
@@ -54,7 +58,7 @@ class BackupCommand extends AlgoliaCommand
         $success = $this->saveRules($indexName);
 
         if ($success) {
-            $this->info('All query rules for ['.$class.'] index have been backed up.');
+            $this->info('All query rules for ['.$fqn.'] index have been backed up.');
         } else {
             $this->warn('The query rules could not be saved');
         }
@@ -62,7 +66,6 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveSettings($indexName)
     {
-        $filename = $this->path.$indexName.'.json';
         $settings = $this->getIndex($indexName)->getSettings();
 
         $child = true;
@@ -72,13 +75,10 @@ class BackupCommand extends AlgoliaCommand
             }
         }
 
-        $success = File::put(
-            $filename,
-            json_encode($settings, JSON_PRETTY_PRINT)
-        );
+        $success = $this->indexRepository->saveSettings($indexName, $settings);
 
         if ($success) {
-            $this->line($filename.' was created.');
+            $this->line("Saved settings for $indexName");
         }
 
         return $success && $child;
@@ -86,21 +86,17 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveSynonyms($indexName)
     {
-        $filename = $this->path.$indexName.'-synonyms.json';
         $synonymIterator = $this->getIndex($indexName)->initSynonymIterator();
-        $synonyms = [];
 
+        $synonyms = [];
         foreach ($synonymIterator as $synonym) {
             $synonyms[] = $synonym;
         }
 
-        $success = File::put(
-            $filename,
-            json_encode($synonyms, JSON_PRETTY_PRINT)
-        );
+        $success = $this->indexRepository->saveSynonyms($indexName, $synonyms);
 
         if ($success) {
-            $this->line($filename.' was created.');
+            $this->line("Saved synonyms for $indexName");
         }
 
         return $success;
@@ -108,21 +104,18 @@ class BackupCommand extends AlgoliaCommand
 
     protected function saveRules($indexName)
     {
-        $filename = $this->path.$indexName.'-rules.json';
         $ruleIterator = $this->getIndex($indexName)->initRuleIterator();
-        $rules = [];
 
+        $rules = [];
         foreach ($ruleIterator as $rule) {
             $rules[] = $rule;
         }
 
-        $success = File::put(
-            $filename,
-            json_encode($rules, JSON_PRETTY_PRINT)
-        );
+        $success = $this->indexRepository->saveRules($indexName, $rules);
 
         if ($success) {
-            $this->line($filename.' was created.');
+            $this->line("Saved synonyms for $indexName");
+
         }
 
         return $success;

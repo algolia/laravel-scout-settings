@@ -4,8 +4,9 @@ namespace Algolia\Settings\Console;
 
 use AlgoliaSearch\Json;
 use Illuminate\Support\Facades\File;
+use Laravel\Scout\Searchable;
 
-class PushCommand extends AlgoliaCommand
+final class PushCommand extends AlgoliaCommand
 {
     /**
      * The name and signature of the console command.
@@ -24,36 +25,37 @@ class PushCommand extends AlgoliaCommand
     /**
      * Execute the console command.
      *
-     * @return void
+     * @return int
      */
     public function handle()
     {
-        $class = $this->argument('model');
+        $fqn = $this->argument('model');
 
-        if (! $this->isClassSearchable($class)) {
-            return;
+        if (! $this->isClassSearchable($fqn)) {
+            $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
+
+            // Return value >0 to indicate error. Bash "1" means "general error"
+            return 1;
         }
 
-        $indexName = (new $class)->searchableAs();
+        $indexName = (new $fqn)->searchableAs();
 
         $this->pushSettings($indexName);
 
-        $this->info('All settings for ['.$class.'] index have been pushed.');
+        $this->info('All settings for ['.$fqn.'] index have been pushed.');
 
         $this->pushSynonyms($indexName);
 
-        $this->info('All synonyms for ['.$class.'] index have been pushed.');
+        $this->info('All synonyms for ['.$fqn.'] index have been pushed.');
 
         $this->pushRules($indexName);
 
-        $this->info('All query rules for ['.$class.'] index have been pushed.');
+        $this->info('All query rules for ['.$fqn.'] index have been pushed.');
     }
 
     protected function pushSettings($indexName)
     {
-        $index = $this->getIndex($indexName);
-
-        $settings = Json::decode(File::get($this->path.$indexName.'.json'), true);
+        $settings = $this->indexRepository->getSettings($indexName);
 
         if (isset($settings['replicas'])) {
             foreach ($settings['replicas'] as $replica) {
@@ -61,9 +63,9 @@ class PushCommand extends AlgoliaCommand
             }
         }
 
-        $index->setSettings($settings);
+        $this->getIndex($indexName)->setSettings($settings);
 
-        $this->line('Pushing settings for '.$indexName.' index.');
+        $this->line('Pushing settings for ' . $indexName . ' index.');
     }
 
     protected function pushSynonyms($indexName)
@@ -74,13 +76,13 @@ class PushCommand extends AlgoliaCommand
         $task = $index->clearSynonyms(true);
         $index->waitTask($task['taskID']);
 
-        $synonyms = Json::decode(File::get($this->path.$indexName.'-synonyms.json'), true);
+        $synonyms = $this->indexRepository->getSynonyms($indexName);
 
         foreach (array_chunk($synonyms, 1000) as $batch) {
             $index->batchSynonyms($batch, true, true);
         }
 
-        $this->line('Pushing synonyms for '.$indexName.' index.');
+        $this->line('Pushing synonyms for ' . $indexName . ' index.');
     }
 
     protected function pushRules($indexName)
@@ -91,12 +93,12 @@ class PushCommand extends AlgoliaCommand
         $task = $index->clearRules(true);
         $index->waitTask($task['taskID']);
 
-        $rules = Json::decode(File::get($this->path.$indexName.'-rules.json'), true);
+        $rules = $this->indexRepository->getRules($indexName);
 
         foreach (array_chunk($rules, 1000) as $batch) {
             $index->batchRules($batch, true, true);
         }
 
-        $this->line('Pushing rules for '.$indexName.' index.');
+        $this->line('Pushing rules for ' . $indexName . ' index.');
     }
 }

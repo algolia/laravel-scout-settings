@@ -74,6 +74,12 @@ By default, settings, rules and synonyms are saved into the `resources/algolia-s
 ALGOLIA_SETTINGS_FOLDER=indexmeta php artisan algolia:settings:backup
 ```
 
+## Testing
+
+``` bash
+composer test
+```
+
 ## Need help?
 
 Feel free to open a thread on our [Community forum](https://discourse.algolia.com/)
