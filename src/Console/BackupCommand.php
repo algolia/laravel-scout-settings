@@ -28,13 +28,17 @@ final class BackupCommand extends AlgoliaCommand
     public function handle()
     {
         $fqn = $this->argument('model');
-        $this->indexRepository->usePrefix($this->option('prefix'));
 
         if (! $this->isClassSearchable($fqn)) {
             $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
 
             // Return value >0 to indicate error. Bash "1" means "general error"
             return 1;
+        }
+
+        if ($usePrefix = $this->option('prefix')) {
+            $this->indexRepository->usePrefix($usePrefix);
+            $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
         }
 
         $indexName = (new $fqn)->searchableAs();

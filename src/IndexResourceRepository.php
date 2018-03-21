@@ -54,6 +54,10 @@ final class IndexResourceRepository
 
     private function getJsonFromFile($path)
     {
+        if (! File::exists($path)) {
+            return [];
+        }
+
         return Json::decode(
             File::get($path),
             true

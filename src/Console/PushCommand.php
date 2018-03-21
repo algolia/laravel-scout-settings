@@ -28,33 +28,49 @@ final class PushCommand extends AlgoliaCommand
     public function handle()
     {
         $fqn = $this->argument('model');
-        $this->indexRepository->usePrefix($this->option('prefix'));
 
         if (! $this->isClassSearchable($fqn)) {
             $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
 
-            // Return value >0 to indicate error. Bash "1" means "general error"
-            return 1;
+            return 1; // Return value >0 to indicate error. Bash "1" means "general error"
+        }
+
+        if ($usePrefix = $this->option('prefix')) {
+            $this->indexRepository->usePrefix($usePrefix);
+            $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
         }
 
         $indexName = (new $fqn)->searchableAs();
 
-        $this->pushSettings($indexName);
+        $done = $this->pushSettings($indexName);
 
-        $this->info('All settings for ['.$fqn.'] index have been pushed.');
+        if ($done) {
+            $this->info('All settings for ['.$fqn.'] index have been pushed.');
+        }
 
-        $this->pushSynonyms($indexName);
+        $done = $this->pushSynonyms($indexName);
 
-        $this->info('All synonyms for ['.$fqn.'] index have been pushed.');
+        if ($done) {
+            $this->info('All synonyms for ['.$fqn.'] index have been pushed.');
+        }
 
-        $this->pushRules($indexName);
+        $done = $this->pushRules($indexName);
 
-        $this->info('All query rules for ['.$fqn.'] index have been pushed.');
+        if ($done) {
+            $this->info('All query rules for ['.$fqn.'] index have been pushed.');
+        }
     }
 
     protected function pushSettings($indexName)
     {
         $settings = $this->indexRepository->getSettings($indexName);
+
+        if (! $settings) {
+            $this->warn('No settings to push to '.$indexName);
+            return false;
+        }
+
+        $this->line('Pushing settings for ' . $indexName . ' index.');
 
         if (isset($settings['replicas'])) {
             foreach ($settings['replicas'] as $replica) {
@@ -64,40 +80,52 @@ final class PushCommand extends AlgoliaCommand
 
         $this->getIndex($indexName)->setSettings($settings);
 
-        $this->line('Pushing settings for ' . $indexName . ' index.');
+        return true;
     }
 
     protected function pushSynonyms($indexName)
     {
-        $index = $this->getIndex($indexName);
+        $synonyms = $this->indexRepository->getSynonyms($indexName);
 
+        if (! $synonyms) {
+            $this->warn('No synonyms to push to '.$indexName);
+            return false;
+        }
+
+        $index = $this->getIndex($indexName);
         // Clear all synonyms from the index
         $task = $index->clearSynonyms(true);
         $index->waitTask($task['taskID']);
 
-        $synonyms = $this->indexRepository->getSynonyms($indexName);
+        $this->line('Pushing synonyms for ' . $indexName . ' index.');
 
         foreach (array_chunk($synonyms, 1000) as $batch) {
             $index->batchSynonyms($batch, true, true);
         }
 
-        $this->line('Pushing synonyms for ' . $indexName . ' index.');
+        return true;
     }
 
     protected function pushRules($indexName)
     {
-        $index = $this->getIndex($indexName);
+        $rules = $this->indexRepository->getRules($indexName);
 
+        if (! $rules) {
+            $this->warn('No query rules to push to '.$indexName);
+            return false;
+        }
+
+        $index = $this->getIndex($indexName);
         // Clear all rules from the index
         $task = $index->clearRules(true);
         $index->waitTask($task['taskID']);
 
-        $rules = $this->indexRepository->getRules($indexName);
+        $this->line('Pushing rules for ' . $indexName . ' index.');
 
         foreach (array_chunk($rules, 1000) as $batch) {
             $index->batchRules($batch, true, true);
         }
 
-        $this->line('Pushing rules for ' . $indexName . ' index.');
+        return true;
     }
 }
