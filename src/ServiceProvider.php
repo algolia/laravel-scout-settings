@@ -4,7 +4,6 @@ namespace Algolia\Settings;
 
 use Algolia\Settings\Console\BackupCommand;
 use Exception;
-use Algolia\Settings\Services\Resource;
 use AlgoliaSearch\Client;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;

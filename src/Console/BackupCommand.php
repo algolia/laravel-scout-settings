@@ -2,7 +2,6 @@
 
 namespace Algolia\Settings\Console;
 
-use Illuminate\Support\Facades\File;
 use Laravel\Scout\Searchable;
 
 final class BackupCommand extends AlgoliaCommand
@@ -12,7 +11,7 @@ final class BackupCommand extends AlgoliaCommand
      *
      * @var string
      */
-    protected $signature = 'algolia:settings:backup {model}';
+    protected $signature = 'algolia:settings:backup {model} {--prefix}';
 
     /**
      * The console command description.
@@ -35,6 +34,11 @@ final class BackupCommand extends AlgoliaCommand
 
             // Return value >0 to indicate error. Bash "1" means "general error"
             return 1;
+        }
+
+        if ($usePrefix = $this->option('prefix')) {
+            $this->indexRepository->usePrefix($usePrefix);
+            $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
         }
 
         $indexName = (new $fqn)->searchableAs();
