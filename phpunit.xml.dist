@@ -19,4 +19,7 @@
             <directory suffix=".php">src/</directory>
         </whitelist>
     </filter>
+    <php>
+        <env name="SCOUT_PREFIX" value="testing_"/>
+    </php>
 </phpunit>

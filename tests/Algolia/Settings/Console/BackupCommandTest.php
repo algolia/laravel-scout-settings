@@ -9,7 +9,7 @@ use Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use AlgoliaSearch\Client;
 use AlgoliaSearch\Index;
 use Illuminate\Contracts\Console\Kernel;
-use Orchestra\Testbench\TestCase;
+use Algolia\Settings\Tests\TestCase;
 use org\bovigo\vfs\vfsStream;
 
 final class BackupCommandTest extends TestCase
@@ -44,7 +44,7 @@ final class BackupCommandTest extends TestCase
                     'title'
                 ],
                 'replicas'             => [
-                    'posts_newest'
+                    'testing_posts_newest'
                 ],
                 'customRanking'        => null,
             ]);
@@ -79,19 +79,19 @@ final class BackupCommandTest extends TestCase
                 ]
             ]);
 
-            $clientProphet->initIndex('posts')->willReturn($postIndexProphet->reveal());
+            $clientProphet->initIndex('testing_posts')->willReturn($postIndexProphet->reveal());
 
             $postNewestIndexProphet = $this->prophesize(Index::class);
             $postNewestIndexProphet->getSettings()->willReturn([
                 'searchableAttributes' => [
                     'title'
                 ],
-                'primary'              => 'posts',
+                'primary'              => 'testing_posts',
                 'customRanking'        => [
                     'desc(published_at)'
                 ],
             ]);
-            $clientProphet->initIndex('posts_newest')->willReturn($postNewestIndexProphet->reveal());
+            $clientProphet->initIndex('testing_posts_newest')->willReturn($postNewestIndexProphet->reveal());
 
             return $clientProphet->reveal();
         });
@@ -113,5 +113,83 @@ final class BackupCommandTest extends TestCase
 
         $this->assertEquals(1, $return_code);
         $this->assertEquals("The class [Algolia\Settings\Tests\TestModel] does not use the [Laravel\Scout\Searchable] trait\n", $cli_output);
+    }
+
+    public function testPrefixInFilesNames()
+    {
+        $this->app[Kernel::class]->registerCommand(new BackupCommand(new IndexResourceRepository()));
+
+        $this->app->bind(Client::class, function () {
+            $clientProphet = $this->prophesize(Client::class);
+
+            $postIndexProphet = $this->prophesize(Index::class);
+            $postIndexProphet->getSettings()->willReturn([
+                'searchableAttributes' => [
+                    'title'
+                ],
+                'replicas'             => [
+                    'testing_posts_newest'
+                ],
+                'customRanking'        => null,
+            ]);
+            $postIndexProphet->initSynonymIterator()->willReturn([
+                [
+                    'type'     => 'synonym',
+                    'synonyms' => [
+                        'foo',
+                        'bar',
+                        'fooz',
+                        'baz',
+                    ],
+                    'objectID' => '1520518966426',
+                ],
+            ]);
+            $postIndexProphet->initRuleIterator()->willReturn([
+                [
+                    'condition'   => [
+                        'pattern'   => '{facet:prefered_contact}',
+                        'anchoring' => 'contains',
+                        'context'   => 'e-commerce',
+                    ],
+                    'consequence' => [
+                        'promote' => [
+                            [
+                                'objectID' => '99',
+                                'position' => 0
+                            ]
+                        ]
+                    ],
+                    'description' => 'Foo bar'
+                ]
+            ]);
+
+            $clientProphet->initIndex('testing_posts')->willReturn($postIndexProphet->reveal());
+
+            $postNewestIndexProphet = $this->prophesize(Index::class);
+            $postNewestIndexProphet->getSettings()->willReturn([
+                'searchableAttributes' => [
+                    'title'
+                ],
+                'primary'              => 'testing_posts',
+                'customRanking'        => [
+                    'desc(published_at)'
+                ],
+            ]);
+            $clientProphet->initIndex('testing_posts_newest')->willReturn($postNewestIndexProphet->reveal());
+
+            return $clientProphet->reveal();
+        });
+
+        config(['scout.prefix' => 'testing_']);
+
+        $this->artisan('algolia:settings:backup', [
+            'model' => TestModelWithSearchableTrait::class,
+            '--prefix' => null,
+        ]);
+
+        $this->assertFileExists($this->file_system->url() . '/resources/algolia-settings/testing_posts.json');
+        $this->assertFileExists($this->file_system->url() . '/resources/algolia-settings/testing_posts_newest.json');
+        $this->assertFileExists($this->file_system->url() . '/resources/algolia-settings/testing_posts-rules.json');
+        $this->assertFileExists($this->file_system->url() . '/resources/algolia-settings/testing_posts-synonyms.json');
     }
 }
