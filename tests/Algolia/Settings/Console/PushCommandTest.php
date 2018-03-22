@@ -9,7 +9,7 @@ use Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use AlgoliaSearch\Client;
 use AlgoliaSearch\Index;
 use Illuminate\Contracts\Console\Kernel;
-use Orchestra\Testbench\TestCase;
+use Algolia\Settings\Tests\TestCase;
 use org\bovigo\vfs\vfsStream;
 use Prophecy\Argument;
 
@@ -30,7 +30,7 @@ final class PushCommandTest extends TestCase
                             'title'
                         ],
                         'replicas'             => [
-                            'posts_newest'
+                            'testing_posts_newest'
                         ],
                         'customRanking'        => null,
                     ]),
@@ -38,7 +38,7 @@ final class PushCommandTest extends TestCase
                         'searchableAttributes' => [
                             'title'
                         ],
-                        'primary'              => 'posts',
+                        'primary'              => 'testing_posts',
                         'customRanking'        => [
                             'desc(published_at)'
                         ],
@@ -64,6 +64,16 @@ final class PushCommandTest extends TestCase
                             'synonyms' => ['car', 'vehicle', 'auto'],
                         ],
                     ]),
+                    'testing_posts.json' => json_encode([
+                        'searchableAttributes' => [
+                            'title',
+                            'summary'
+                        ],
+                        'replicas'             => [],
+                        'customRanking'        => null,
+                    ]),
+                    'testing_posts-rules.json' => '[]',
+                    'testing_posts-synonyms.json' => '[]',
                 ],
             ],
         ];
@@ -104,5 +114,35 @@ final class PushCommandTest extends TestCase
             "The class [Algolia\Settings\Tests\TestModel] does not use the [Laravel\Scout\Searchable] trait\n",
             $cli_output
         );
+    }
+
+    public function testHandlePrefixedSettingFiles()
+    {
+        $this->app[Kernel::class]->registerCommand(new PushCommand(new IndexResourceRepository()));
+        $this->app->bind(Client::class, function () {
+            $clientProphet = $this->prophesize(Client::class);
+
+            $postIndexProphet = $this->prophesize(Index::class);
+            // Actually assertion the prefixed-settings file was used
+            $postIndexProphet->setSettings([
+                'searchableAttributes' => [
+                    'title',
+                    'summary'
+                ],
+                'replicas'             => [],
+                'customRanking'        => null,
+            ])->shouldBeCalled();
+
+            $clientProphet->initIndex(Argument::any())->willReturn($postIndexProphet->reveal());
+
+            return $clientProphet->reveal();
+        });
+
+        $return_code = $this->artisan('algolia:settings:push', [
+            'model' => TestModelWithSearchableTrait::class,
+            '--prefix' => null,
+        ]);
+
+        $this->assertEquals(0, $return_code);
     }
 }
