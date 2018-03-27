@@ -36,7 +36,6 @@ final class PushCommand extends AlgoliaCommand
         }
 
         if ($usePrefix = $this->option('prefix')) {
-            $this->indexRepository->usePrefix($usePrefix);
             $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
         }
 
@@ -63,7 +62,7 @@ final class PushCommand extends AlgoliaCommand
 
     protected function pushSettings($indexName)
     {
-        $settings = $this->indexRepository->getSettings($indexName);
+        $settings = $this->indexRepository->getSettings($this->canonicalIndexName($indexName));
 
         if (! $settings) {
             $this->warn('No settings to push to '.$indexName);
@@ -85,7 +84,7 @@ final class PushCommand extends AlgoliaCommand
 
     protected function pushSynonyms($indexName)
     {
-        $synonyms = $this->indexRepository->getSynonyms($indexName);
+        $synonyms = $this->indexRepository->getSynonyms($this->canonicalIndexName($indexName));
 
         if (! $synonyms) {
             $this->warn('No synonyms to push to '.$indexName);
@@ -108,7 +107,7 @@ final class PushCommand extends AlgoliaCommand
 
     protected function pushRules($indexName)
     {
-        $rules = $this->indexRepository->getRules($indexName);
+        $rules = $this->indexRepository->getRules($this->canonicalIndexName($indexName));
 
         if (! $rules) {
             $this->warn('No query rules to push to '.$indexName);

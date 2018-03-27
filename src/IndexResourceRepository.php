@@ -8,18 +8,11 @@ use Laravel\Scout\Searchable;
 
 final class IndexResourceRepository
 {
-    private $usePrefix = false;
-
     public function __construct()
     {
         if (! File::exists($path = $this->getBasePath())) {
             File::makeDirectory($path);
         }
-    }
-
-    public function usePrefix($usePrefix = true)
-    {
-        $this->usePrefix = $usePrefix;
     }
 
     public function getSettings($indexName)
@@ -74,10 +67,6 @@ final class IndexResourceRepository
 
     private function getFilePath($indexName, $type)
     {
-        if (! $this->usePrefix) {
-            $indexName = $this->removePrefix($indexName);
-        }
-
         $path = $this->getBasePath() . $indexName . $this->normalizeType($type) . '.json';
 
         return $path;
@@ -100,10 +89,5 @@ final class IndexResourceRepository
                 ),
                 '/'
             ) . DIRECTORY_SEPARATOR;
-    }
-
-    private function removePrefix($indexName)
-    {
-        return preg_replace('/^'.preg_quote(config('scout.prefix'), '/').'/', '', $indexName);
     }
 }

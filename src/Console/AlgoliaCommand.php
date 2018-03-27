@@ -30,4 +30,18 @@ abstract class AlgoliaCommand extends Command
         }
         return true;
     }
+
+    protected function canonicalIndexName($indexName)
+    {
+        if ($this->option('prefix')) {
+            return $indexName;
+        }
+
+        return $this->removePrefix($indexName);
+    }
+
+    private function removePrefix($indexName)
+    {
+        return preg_replace('/^'.preg_quote(config('scout.prefix'), '/').'/', '', $indexName);
+    }
 }

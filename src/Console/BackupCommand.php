@@ -37,7 +37,6 @@ final class BackupCommand extends AlgoliaCommand
         }
 
         if ($usePrefix = $this->option('prefix')) {
-            $this->indexRepository->usePrefix($usePrefix);
             $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
         }
 
@@ -79,10 +78,10 @@ final class BackupCommand extends AlgoliaCommand
             }
         }
 
-        $success = $this->indexRepository->saveSettings($indexName, $settings);
+        $success = $this->indexRepository->saveSettings($this->canonicalIndexName($indexName), $settings);
 
         if ($success) {
-            $this->line("Saved settings for $indexName");
+            $this->line("Saved settings for [$indexName] index");
         }
 
         return $success && $child;
@@ -97,10 +96,10 @@ final class BackupCommand extends AlgoliaCommand
             $synonyms[] = $synonym;
         }
 
-        $success = $this->indexRepository->saveSynonyms($indexName, $synonyms);
+        $success = $this->indexRepository->saveSynonyms($this->canonicalIndexName($indexName), $synonyms);
 
         if ($success) {
-            $this->line("Saved synonyms for $indexName");
+            $this->line("Saved synonyms for [$indexName] index");
         }
 
         return $success;
@@ -115,10 +114,10 @@ final class BackupCommand extends AlgoliaCommand
             $rules[] = $rule;
         }
 
-        $success = $this->indexRepository->saveRules($indexName, $rules);
+        $success = $this->indexRepository->saveRules($this->canonicalIndexName($indexName), $rules);
 
         if ($success) {
-            $this->line("Saved synonyms for $indexName");
+            $this->line("Saved synonyms for [$indexName] index");
 
         }
 
