@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+* Follow the `--prefix` option when backing up and pushing resources - PR [#24](https://github.com/algolia/laravel-scout-settings/pull/24)
+
 ## 2.0.0
 
 * Better message in console
