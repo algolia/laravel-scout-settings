@@ -2,6 +2,7 @@
 
 namespace Algolia\Settings\Console;
 
+use Algolia\Settings\IndexName;
 use Laravel\Scout\Searchable;
 
 final class PushCommand extends AlgoliaCommand
@@ -36,11 +37,10 @@ final class PushCommand extends AlgoliaCommand
         }
 
         if ($usePrefix = $this->option('prefix')) {
-            $this->indexRepository->usePrefix($usePrefix);
-            $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
+            $this->warn('All resources will be looked up in files prefixed with '.config('scout.prefix'));
         }
 
-        $indexName = (new $fqn)->searchableAs();
+        $indexName = IndexName::createFromRemote((new $fqn)->searchableAs(), $usePrefix);
 
         $done = $this->pushSettings($indexName);
 
@@ -61,7 +61,7 @@ final class PushCommand extends AlgoliaCommand
         }
     }
 
-    protected function pushSettings($indexName)
+    protected function pushSettings(IndexName $indexName)
     {
         $settings = $this->indexRepository->getSettings($indexName);
 
@@ -74,7 +74,8 @@ final class PushCommand extends AlgoliaCommand
 
         if (isset($settings['replicas'])) {
             foreach ($settings['replicas'] as $replica) {
-                $this->pushSettings($replica);
+                $replicaName = IndexName::createFromLocal($replica, $this->option('prefix'));
+                $this->pushSettings($replicaName);
             }
         }
 
@@ -83,7 +84,7 @@ final class PushCommand extends AlgoliaCommand
         return true;
     }
 
-    protected function pushSynonyms($indexName)
+    protected function pushSynonyms(IndexName $indexName)
     {
         $synonyms = $this->indexRepository->getSynonyms($indexName);
 
@@ -106,7 +107,7 @@ final class PushCommand extends AlgoliaCommand
         return true;
     }
 
-    protected function pushRules($indexName)
+    protected function pushRules(IndexName $indexName)
     {
         $rules = $this->indexRepository->getRules($indexName);
 

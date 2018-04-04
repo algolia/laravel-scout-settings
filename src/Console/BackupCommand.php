@@ -2,6 +2,7 @@
 
 namespace Algolia\Settings\Console;
 
+use Algolia\Settings\IndexName;
 use Laravel\Scout\Searchable;
 
 final class BackupCommand extends AlgoliaCommand
@@ -37,11 +38,10 @@ final class BackupCommand extends AlgoliaCommand
         }
 
         if ($usePrefix = $this->option('prefix')) {
-            $this->indexRepository->usePrefix($usePrefix);
             $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
         }
 
-        $indexName = (new $fqn)->searchableAs();
+        $indexName = IndexName::createFromRemote((new $fqn)->searchableAs(), $usePrefix);
 
         $success = $this->saveSettings($indexName);
 
@@ -68,14 +68,15 @@ final class BackupCommand extends AlgoliaCommand
         }
     }
 
-    protected function saveSettings($indexName)
+    protected function saveSettings(IndexName $indexName)
     {
         $settings = $this->getIndex($indexName)->getSettings();
 
         $child = true;
         if (isset($settings['replicas'])) {
             foreach ($settings['replicas'] as $replica) {
-                $child = $this->saveSettings($replica);
+                $replicaName = IndexName::createFromRemote($replica, $this->option('prefix'));
+                $child = $this->saveSettings($replicaName);
             }
         }
 
@@ -88,7 +89,7 @@ final class BackupCommand extends AlgoliaCommand
         return $success && $child;
     }
 
-    protected function saveSynonyms($indexName)
+    protected function saveSynonyms(IndexName $indexName)
     {
         $synonymIterator = $this->getIndex($indexName)->initSynonymIterator();
 
@@ -106,7 +107,7 @@ final class BackupCommand extends AlgoliaCommand
         return $success;
     }
 
-    protected function saveRules($indexName)
+    protected function saveRules(IndexName $indexName)
     {
         $ruleIterator = $this->getIndex($indexName)->initRuleIterator();
 

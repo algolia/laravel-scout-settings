@@ -4,12 +4,9 @@ namespace Algolia\Settings;
 
 use AlgoliaSearch\Json;
 use Illuminate\Support\Facades\File;
-use Laravel\Scout\Searchable;
 
 final class IndexResourceRepository
 {
-    private $usePrefix = false;
-
     public function __construct()
     {
         if (! File::exists($path = $this->getBasePath())) {
@@ -17,37 +14,35 @@ final class IndexResourceRepository
         }
     }
 
-    public function usePrefix($usePrefix = true)
-    {
-        $this->usePrefix = $usePrefix;
-    }
-
-    public function getSettings($indexName)
+    public function getSettings(IndexName $indexName)
     {
         return $this->getJsonFromFile($this->getFilePath($indexName, 'settings'));
     }
 
-    public function saveSettings($indexName, $settings)
+    public function saveSettings(IndexName $indexName, $settings)
     {
-        return $this->saveJsonFile($this->getFilePath($indexName, 'settings'), $settings);
+        return $this->saveJsonFile(
+            $this->getFilePath($indexName, 'settings'),
+            $this->normalizeSettings($indexName, $settings)
+        );
     }
 
-    public function getSynonyms($indexName)
+    public function getSynonyms(IndexName $indexName)
     {
         return $this->getJsonFromFile($this->getFilePath($indexName, 'synonyms'));
     }
 
-    public function saveSynonyms($indexName, $synonyms)
+    public function saveSynonyms(IndexName $indexName, $synonyms)
     {
         return $this->saveJsonFile($this->getFilePath($indexName, 'synonyms'), $synonyms);
     }
 
-    public function getRules($indexName)
+    public function getRules(IndexName $indexName)
     {
         return $this->getJsonFromFile($this->getFilePath($indexName, 'rules'));
     }
 
-    public function saveRules($indexName, $rules)
+    public function saveRules(IndexName $indexName, $rules)
     {
         return $this->saveJsonFile($this->getFilePath($indexName, 'rules'), $rules);
     }
@@ -72,15 +67,39 @@ final class IndexResourceRepository
         );
     }
 
-    private function getFilePath($indexName, $type)
+    private function getFilePath(IndexName $indexName, $type)
     {
-        if (! $this->usePrefix) {
-            $indexName = $this->removePrefix($indexName);
-        }
-
-        $path = $this->getBasePath() . $indexName . $this->normalizeType($type) . '.json';
+        $path = $this->getBasePath() . $indexName->local() . $this->normalizeType($type) . '.json';
 
         return $path;
+    }
+
+    private function normalizeSettings(IndexName $indexName, array $json)
+    {
+        if($indexName->usesPrefix()) {
+            // Indices in JSON should contain the prefix
+            return $json;
+        }
+
+        if (isset($json['primary'])) {
+            $json['primary'] = preg_replace(
+                '/^' . preg_quote(config('scout.prefix'), '/') . '/',
+                '',
+                $json['primary']
+            );
+        }
+
+        if(isset($json['replicas'])) {
+            foreach($json['replicas'] as &$replica) {
+                $replica = preg_replace(
+                    '/^' . preg_quote(config('scout.prefix'), '/') . '/',
+                    '',
+                    $replica
+                );
+            }
+        }
+
+        return $json;
     }
 
     private function normalizeType($type)
@@ -100,10 +119,5 @@ final class IndexResourceRepository
                 ),
                 '/'
             ) . DIRECTORY_SEPARATOR;
-    }
-
-    private function removePrefix($indexName)
-    {
-        return preg_replace('/^'.preg_quote(config('scout.prefix'), '/').'/', '', $indexName);
     }
 }

@@ -30,7 +30,7 @@ final class PushCommandTest extends TestCase
                             'title'
                         ],
                         'replicas'             => [
-                            'testing_posts_newest'
+                            'posts_newest'
                         ],
                         'customRanking'        => null,
                     ]),
@@ -38,7 +38,7 @@ final class PushCommandTest extends TestCase
                         'searchableAttributes' => [
                             'title'
                         ],
-                        'primary'              => 'testing_posts',
+                        'primary'              => 'posts',
                         'customRanking'        => [
                             'desc(published_at)'
                         ],
@@ -92,7 +92,7 @@ final class PushCommandTest extends TestCase
 
             $postIndexProphet = $this->prophesize(Index::class);
 
-            $clientProphet->initIndex(Argument::any())->willReturn($postIndexProphet->reveal());
+            $clientProphet->initIndex(Argument::containingString('testing_posts'))->willReturn($postIndexProphet->reveal());
 
             return $clientProphet->reveal();
         });
@@ -133,7 +133,7 @@ final class PushCommandTest extends TestCase
                 'customRanking'        => null,
             ])->shouldBeCalled();
 
-            $clientProphet->initIndex(Argument::any())->willReturn($postIndexProphet->reveal());
+            $clientProphet->initIndex(Argument::containingString('testing_posts'))->willReturn($postIndexProphet->reveal());
 
             return $clientProphet->reveal();
         });

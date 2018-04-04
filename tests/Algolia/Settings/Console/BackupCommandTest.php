@@ -63,7 +63,7 @@ final class BackupCommandTest extends TestCase
             $postIndexProphet->initRuleIterator()->willReturn([
                 [
                     'condition'   => [
-                        'pattern'   => '{facet:prefered_contact}',
+                        'pattern'   => '{facet:preferred_contact}',
                         'anchoring' => 'contains',
                         'context'   => 'e-commerce',
                     ],
@@ -147,7 +147,7 @@ final class BackupCommandTest extends TestCase
             $postIndexProphet->initRuleIterator()->willReturn([
                 [
                     'condition'   => [
-                        'pattern'   => '{facet:prefered_contact}',
+                        'pattern'   => '{facet:preferred_contact}',
                         'anchoring' => 'contains',
                         'context'   => 'e-commerce',
                     ],
@@ -179,8 +179,6 @@ final class BackupCommandTest extends TestCase
 
             return $clientProphet->reveal();
         });
-
-        config(['scout.prefix' => 'testing_']);
 
         $this->artisan('algolia:settings:backup', [
             'model' => TestModelWithSearchableTrait::class,

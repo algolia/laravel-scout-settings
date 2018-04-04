@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+* Introduce `IndexName` value object to guard the difference between remote name 
+and local name of an Index
+* Sanitize the index names in the files when not using the `--prefix`-option
+* Expand tests for further coverage 
+
 ## 2.0.0
 
 * Better message in console

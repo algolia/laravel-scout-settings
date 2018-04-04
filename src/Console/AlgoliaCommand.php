@@ -2,6 +2,7 @@
 
 namespace Algolia\Settings\Console;
 
+use Algolia\Settings\IndexName;
 use Algolia\Settings\IndexResourceRepository;
 use AlgoliaSearch\Client;
 use Illuminate\Console\Command;
@@ -18,9 +19,9 @@ abstract class AlgoliaCommand extends Command
         $this->indexRepository = $indexRepository;
     }
 
-    protected function getIndex($indexName)
+    protected function getIndex(IndexName $indexName)
     {
-        return app(Client::class)->initIndex($indexName);
+        return app(Client::class)->initIndex($indexName->remote());
     }
 
     protected function isClassSearchable($fqn)

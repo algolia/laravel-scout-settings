@@ -2,6 +2,7 @@
 
 namespace Algolia\Settings\Tests\Algolia\Settings;
 
+use Algolia\Settings\IndexName;
 use Algolia\Settings\IndexResourceRepository;
 use Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use Algolia\Settings\Tests\TestCase;
@@ -118,7 +119,7 @@ POST
             'title'
         ];
 
-        $postSettings = $sut->getSettings((new TestModelWithSearchableTrait)->searchableAs());
+        $postSettings = $sut->getSettings(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), false));
         $actual = $postSettings['searchableAttributes'];
 
         $this->assertEquals($expected, $actual);
@@ -136,7 +137,7 @@ POST
                 'summary',
             ];
 
-            $postSettings = $sut->getSettings((new TestModelWithSearchableTrait)->searchableAs());
+            $postSettings = $sut->getSettings(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), false));
             $actual = $postSettings['searchableAttributes'];
 
             $this->assertEquals($expected, $actual);
@@ -149,7 +150,7 @@ POST
     {
         $sut = new IndexResourceRepository();
 
-        $actual = $sut->getSettings('foobar');
+        $actual = $sut->getSettings(IndexName::createFromRemote('foobar', false));
 
         $this->assertEquals([], $actual);
     }
@@ -170,7 +171,7 @@ POST
         }
     }
 
-    public function testSaveSettings()
+    public function testSaveSettingsPrimaryUsingPrefix()
     {
         $settings = [
             'searchableAttributes' => [
@@ -187,10 +188,104 @@ POST
 
         $sut = new IndexResourceRepository();
 
-        $actual = $sut->saveSettings((new TestModelWithSearchableTrait)->searchableAs(), $settings);
-        $expected = \json_encode($settings);
-
+        $actual = $sut->saveSettings(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), true), $settings);
         $this->assertNotFalse($actual);
+
+        $expected = \json_encode($settings);
+        $this->assertJsonStringEqualsJsonString(
+            $expected,
+            $this->file_system->getChild('resources/algolia-settings/testing_posts.json')->getContent()
+        );
+    }
+
+    public function testSaveSettingsPrimaryWithoutPrefix()
+    {
+        $settings = [
+            'searchableAttributes' => [
+                'title',
+                'summary',
+                'tags',
+            ],
+            'replicas'             => [
+                'testing_posts_newest',
+                'testing_posts_oldest',
+            ],
+            'customRanking'        => null,
+        ];
+
+        $sut = new IndexResourceRepository();
+
+        $actual = $sut->saveSettings(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), false), $settings);
+        $this->assertNotFalse($actual);
+
+        $expected = \json_encode([
+            'searchableAttributes' => [
+                'title',
+                'summary',
+                'tags',
+            ],
+            'replicas'             => [
+                'posts_newest',
+                'posts_oldest',
+            ],
+            'customRanking'        => null,
+        ]);
+        $this->assertJsonStringEqualsJsonString(
+            $expected,
+            $this->file_system->getChild('resources/algolia-settings/posts.json')->getContent()
+        );
+    }
+
+    public function testSaveSettingsReplicaUsingPrefix()
+    {
+        $settings = [
+            'searchableAttributes' => [
+                'title',
+                'summary',
+                'tags',
+            ],
+            'primary'             => 'testing_posts',
+            'customRanking'        => null,
+        ];
+
+        $sut = new IndexResourceRepository();
+
+        $actual = $sut->saveSettings(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), true), $settings);
+        $this->assertNotFalse($actual);
+
+        $expected = \json_encode($settings);
+        $this->assertJsonStringEqualsJsonString(
+            $expected,
+            $this->file_system->getChild('resources/algolia-settings/testing_posts.json')->getContent()
+        );
+    }
+
+    public function testSaveSettingsReplicaWithoutPrefix()
+    {
+        $settings = [
+            'searchableAttributes' => [
+                'title',
+                'summary',
+                'tags',
+            ],
+            'primary'             => 'testing_posts',
+            'customRanking'        => null,
+        ];
+
+        $sut = new IndexResourceRepository();
+
+        $actual = $sut->saveSettings(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), false), $settings);
+        $this->assertNotFalse($actual);
+
+        $expected = \json_encode([
+            'searchableAttributes' => [
+                'title',
+                'summary',
+                'tags',
+            ],
+            'primary'             => 'posts',
+            'customRanking'        => null,
+        ]);
         $this->assertJsonStringEqualsJsonString(
             $expected,
             $this->file_system->getChild('resources/algolia-settings/posts.json')->getContent()
@@ -216,7 +311,7 @@ POST
             ],
         ];
 
-        $actual = $sut->getRules((new TestModelWithSearchableTrait)->searchableAs());
+        $actual = $sut->getRules(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), false));
 
         $this->assertEquals($expected, $actual);
     }
@@ -240,7 +335,7 @@ POST
 
         $sut = new IndexResourceRepository();
 
-        $actual = $sut->saveRules((new TestModelWithSearchableTrait)->searchableAs(), $rules);
+        $actual = $sut->saveRules(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), false), $rules);
         $expected = \json_encode($rules);
 
         $this->assertNotFalse($actual);
@@ -267,7 +362,7 @@ POST
 
         $sut = new IndexResourceRepository();
 
-        $actual = $sut->saveSynonyms((new TestModelWithSearchableTrait)->searchableAs(), $synonyms);
+        $actual = $sut->saveSynonyms(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), false), $synonyms);
         $expected = \json_encode($synonyms);
 
         $this->assertNotFalse($actual);
@@ -289,32 +384,8 @@ POST
             ],
         ];
 
-        $actual = $sut->getSynonyms((new TestModelWithSearchableTrait)->searchableAs());
+        $actual = $sut->getSynonyms(IndexName::createFromRemote((new TestModelWithSearchableTrait)->searchableAs(), false));
 
         $this->assertEquals($expected, $actual);
-    }
-
-    /**
-     * @dataProvider prefixOptionProvider
-     */
-    public function testUsePrefix($prefixOption, $expected)
-    {
-        $sut = new IndexResourceRepository();
-
-        $sut->usePrefix($prefixOption);
-
-        $reflected_property = new \ReflectionProperty(get_class($sut), 'usePrefix');
-        $reflected_property->setAccessible(true);
-        $actual = $reflected_property->getValue($sut);
-
-        $this->assertEquals($expected, $actual);
-    }
-
-    public function prefixOptionProvider()
-    {
-        return [
-            [true, true],
-            [false, false],
-        ];
     }
 }
