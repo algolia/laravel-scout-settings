@@ -29,16 +29,18 @@ final class BackupCommand extends AlgoliaCommand
     {
         $fqn = $this->argument('model');
 
-        if (! $this->isClassSearchable($fqn)) {
-            $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
+        if (!env('ALGOLIA_SETTINGS_SKIP_CHECK')) {
+            if (!$this->isClassSearchable($fqn)) {
+                $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
 
-            // Return value >0 to indicate error. Bash "1" means "general error"
-            return 1;
+                // Return value >0 to indicate error. Bash "1" means "general error"
+                return 1;
+            }
         }
 
         if ($usePrefix = $this->option('prefix')) {
             $this->indexRepository->usePrefix($usePrefix);
-            $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
+            $this->warn('All resources will be saved in files prefixed with ' . config('scout.prefix'));
         }
 
         $indexName = (new $fqn)->searchableAs();
@@ -46,7 +48,7 @@ final class BackupCommand extends AlgoliaCommand
         $success = $this->saveSettings($indexName);
 
         if ($success) {
-            $this->info('All settings for ['.$fqn.'] index have been backed up.');
+            $this->info('All settings for [' . $fqn . '] index have been backed up.');
         } else {
             $this->warn('The settings could not be saved');
         }
@@ -54,7 +56,7 @@ final class BackupCommand extends AlgoliaCommand
         $success = $this->saveSynonyms($indexName);
 
         if ($success) {
-            $this->info('All synonyms for ['.$fqn.'] index have been backed up.');
+            $this->info('All synonyms for [' . $fqn . '] index have been backed up.');
         } else {
             $this->warn('The synonyms could not be saved');
         }
@@ -62,7 +64,7 @@ final class BackupCommand extends AlgoliaCommand
         $success = $this->saveRules($indexName);
 
         if ($success) {
-            $this->info('All query rules for ['.$fqn.'] index have been backed up.');
+            $this->info('All query rules for [' . $fqn . '] index have been backed up.');
         } else {
             $this->warn('The query rules could not be saved');
         }
