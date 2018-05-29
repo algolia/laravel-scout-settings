@@ -14,12 +14,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Algolia\\Settings\\": "src/"
+            "Ubeeqo\\Algolia\\Settings\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Algolia\\Settings\\Tests\\": "tests"
+            "Ubeeqo\\Algolia\\Settings\\Tests\\": "tests"
         }
     },
     "license": "MIT",
