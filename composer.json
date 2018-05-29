@@ -1,6 +1,7 @@
 {
     "name": "ubeeqo/laravel-scout-settings",
     "description": "Import/Export Algolia settings into your Laravel Scout project",
+    "version": "2.0.1",
     "keywords": [
         "algolia",
         "laravel",
