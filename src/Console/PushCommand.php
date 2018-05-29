@@ -1,6 +1,6 @@
 <?php
 
-namespace Algolia\Settings\Console;
+namespace Ubeeqo\Algolia\Settings\Console;
 
 use Laravel\Scout\Searchable;
 

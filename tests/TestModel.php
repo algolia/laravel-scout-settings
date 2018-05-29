@@ -1,6 +1,6 @@
 <?php
 
-namespace Algolia\Settings\Tests;
+namespace Ubeeqo\Algolia\Settings\Tests;
 
 /**
  * Tmp class. Since Laravel 5.4 is supported, the minimum version of PHP is

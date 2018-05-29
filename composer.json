@@ -1,5 +1,5 @@
 {
-    "name": "algolia/laravel-scout-settings-ubeeqo",
+    "name": "ubeeqo/laravel-scout-settings",
     "description": "Import/Export Algolia settings into your Laravel Scout project",
     "keywords": [
         "algolia",
