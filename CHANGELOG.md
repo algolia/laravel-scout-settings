@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+Allow to skip class check
+
 ## 2.0.0
 
 * Better message in console
