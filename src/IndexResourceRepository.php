@@ -1,6 +1,6 @@
 <?php
 
-namespace Algolia\Settings;
+namespace Ubeeqo\Algolia\Settings;
 
 use AlgoliaSearch\Json;
 use Illuminate\Support\Facades\File;

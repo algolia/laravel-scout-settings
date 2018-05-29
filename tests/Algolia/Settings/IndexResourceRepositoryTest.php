@@ -1,10 +1,10 @@
 <?php
 
-namespace Algolia\Settings\Tests\Algolia\Settings;
+namespace Ubeeqo\Algolia\Settings\Tests\Algolia\Settings;
 
-use Algolia\Settings\IndexResourceRepository;
-use Algolia\Settings\Tests\TestModel;
-use Algolia\Settings\Tests\TestModelWithSearchableTrait;
+use Ubeeqo\Algolia\Settings\IndexResourceRepository;
+use Ubeeqo\Algolia\Settings\Tests\TestModel;
+use Ubeeqo\Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use Laravel\Scout\Searchable;
 use Orchestra\Testbench\TestCase;
 use org\bovigo\vfs\vfsStream;

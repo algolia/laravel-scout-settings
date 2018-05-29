@@ -1,6 +1,7 @@
 {
-    "name": "algolia/laravel-scout-settings",
+    "name": "ubeeqo/laravel-scout-settings",
     "description": "Import/Export Algolia settings into your Laravel Scout project",
+    "version": "2.0.1",
     "keywords": [
         "algolia",
         "laravel",
@@ -14,12 +15,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Algolia\\Settings\\": "src/"
+            "Ubeeqo\\Algolia\\Settings\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Algolia\\Settings\\Tests\\": "tests"
+            "Ubeeqo\\Algolia\\Settings\\Tests\\": "tests"
         }
     },
     "license": "MIT",
@@ -36,7 +37,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Algolia\\Settings\\ServiceProvider"
+                "Ubeeqo\\Algolia\\Settings\\ServiceProvider"
             ]
         }
     },

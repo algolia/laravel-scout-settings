@@ -1,11 +1,11 @@
 <?php
 
-namespace Algolia\Settings\Tests\Console;
+namespace Ubeeqo\Algolia\Settings\Tests\Console;
 
-use Algolia\Settings\Console\BackupCommand;
-use Algolia\Settings\IndexResourceRepository;
-use Algolia\Settings\Tests\TestModel;
-use Algolia\Settings\Tests\TestModelWithSearchableTrait;
+use Ubeeqo\Algolia\Settings\Console\BackupCommand;
+use Ubeeqo\Algolia\Settings\IndexResourceRepository;
+use Ubeeqo\Algolia\Settings\Tests\TestModel;
+use Ubeeqo\Algolia\Settings\Tests\TestModelWithSearchableTrait;
 use AlgoliaSearch\Client;
 use AlgoliaSearch\Index;
 use Illuminate\Contracts\Console\Kernel;

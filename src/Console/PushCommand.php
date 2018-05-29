@@ -1,6 +1,6 @@
 <?php
 
-namespace Algolia\Settings\Console;
+namespace Ubeeqo\Algolia\Settings\Console;
 
 use Laravel\Scout\Searchable;
 
@@ -29,15 +29,17 @@ final class PushCommand extends AlgoliaCommand
     {
         $fqn = $this->argument('model');
 
-        if (! $this->isClassSearchable($fqn)) {
-            $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
+        if (!env('ALGOLIA_SETTINGS_SKIP_CHECK')) {
+            if (!$this->isClassSearchable($fqn)) {
+                $this->warn('The class [' . $fqn . '] does not use the [' . Searchable::class . '] trait');
 
-            return 1; // Return value >0 to indicate error. Bash "1" means "general error"
+                return 1; // Return value >0 to indicate error. Bash "1" means "general error"
+            }
         }
 
         if ($usePrefix = $this->option('prefix')) {
             $this->indexRepository->usePrefix($usePrefix);
-            $this->warn('All resources will be saved in files prefixed with '.config('scout.prefix'));
+            $this->warn('All resources will be saved in files prefixed with ' . config('scout.prefix'));
         }
 
         $indexName = (new $fqn)->searchableAs();
@@ -45,19 +47,19 @@ final class PushCommand extends AlgoliaCommand
         $done = $this->pushSettings($indexName);
 
         if ($done) {
-            $this->info('All settings for ['.$fqn.'] index have been pushed.');
+            $this->info('All settings for [' . $fqn . '] index have been pushed.');
         }
 
         $done = $this->pushSynonyms($indexName);
 
         if ($done) {
-            $this->info('All synonyms for ['.$fqn.'] index have been pushed.');
+            $this->info('All synonyms for [' . $fqn . '] index have been pushed.');
         }
 
         $done = $this->pushRules($indexName);
 
         if ($done) {
-            $this->info('All query rules for ['.$fqn.'] index have been pushed.');
+            $this->info('All query rules for [' . $fqn . '] index have been pushed.');
         }
     }
 
@@ -65,8 +67,8 @@ final class PushCommand extends AlgoliaCommand
     {
         $settings = $this->indexRepository->getSettings($indexName);
 
-        if (! $settings) {
-            $this->warn('No settings to push to '.$indexName);
+        if (!$settings) {
+            $this->warn('No settings to push to ' . $indexName);
             return false;
         }
 
@@ -87,8 +89,8 @@ final class PushCommand extends AlgoliaCommand
     {
         $synonyms = $this->indexRepository->getSynonyms($indexName);
 
-        if (! $synonyms) {
-            $this->warn('No synonyms to push to '.$indexName);
+        if (!$synonyms) {
+            $this->warn('No synonyms to push to ' . $indexName);
             return false;
         }
 
@@ -110,8 +112,8 @@ final class PushCommand extends AlgoliaCommand
     {
         $rules = $this->indexRepository->getRules($indexName);
 
-        if (! $rules) {
-            $this->warn('No query rules to push to '.$indexName);
+        if (!$rules) {
+            $this->warn('No query rules to push to ' . $indexName);
             return false;
         }
 

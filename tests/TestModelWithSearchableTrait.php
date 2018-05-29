@@ -1,6 +1,6 @@
 <?php
 
-namespace Algolia\Settings\Tests;
+namespace Ubeeqo\Algolia\Settings\Tests;
 
 use Laravel\Scout\Searchable;
 

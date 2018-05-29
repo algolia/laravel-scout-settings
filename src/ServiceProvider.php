@@ -1,18 +1,18 @@
 <?php
 
-namespace Algolia\Settings;
+namespace Ubeeqo\Algolia\Settings;
 
-use Algolia\Settings\Console\BackupCommand;
+use Ubeeqo\Algolia\Settings\Console\BackupCommand;
 use Exception;
 use AlgoliaSearch\Client;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
-use Algolia\Settings\Console\PushCommand;
+use Ubeeqo\Algolia\Settings\Console\PushCommand;
 use AlgoliaSearch\Version as AlgoliaUserAgent;
 
 final class ServiceProvider extends LaravelServiceProvider
 {
-    const VERSION = '2.0.0';
+    const VERSION = '2.0.1';
 
     public function boot()
     {
