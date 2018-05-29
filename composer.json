@@ -36,7 +36,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Algolia\\Settings\\ServiceProvider"
+                "Ubeeqo\\Algolia\\Settings\\ServiceProvider"
             ]
         }
     },
