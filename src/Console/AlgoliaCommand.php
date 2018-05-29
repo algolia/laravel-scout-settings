@@ -2,7 +2,7 @@
 
 namespace Ubeeqo\Algolia\Settings\Console;
 
-use Algolia\Settings\IndexResourceRepository;
+use Ubeeqo\Algolia\Settings\IndexResourceRepository;
 use AlgoliaSearch\Client;
 use Illuminate\Console\Command;
 use Laravel\Scout\Searchable;
