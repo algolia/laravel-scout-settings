@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+* Add compatibility with Laravel Scout 5.0
+
 ## 2.0.0
 
 * Better message in console
@@ -13,16 +17,16 @@
     use a different prefix, you weren't able to do this.
     In case you want to keep the behavior like in v1, pass the `--prefix` option
     to the 2 commands.
-    
+
     See [issue #14](https://github.com/algolia/laravel-scout-settings/issues/14)
-    
+
 * Introduce new IndexResourceRepository service class
-    
+
     This service allows you to read and write files with your settings,
     synonyms, rules via simple methods. This class doesn't interact with
     Algolia's API but with files in your `resources` folder.
     Thanks @qrazi
-    
+
 
 ### 1.0.1
 
