@@ -118,8 +118,7 @@ final class BackupCommand extends AlgoliaCommand
         $success = $this->indexRepository->saveRules($indexName, $rules);
 
         if ($success) {
-            $this->line("Saved synonyms for $indexName");
-
+            $this->line("Saved query rules for $indexName");
         }
 
         return $success;
