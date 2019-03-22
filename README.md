@@ -1,3 +1,5 @@
+**DEPRECATED: Use of this repository is deprecated. Please use Scout Extended - https://github.com/algolia/scout-extended instead.**
+
 # Laravel Scout Settings
 
 **Import/Export Algolia settings, synonyms and query rules into your Laravel Scout project.**
